@@ -1,0 +1,25 @@
+body{
+    margin: 30px;
+    padding: 10px;
+    
+}
+    p {
+    padding: 10px;
+    background-color: #ffddff;
+}
+
+
+#text_container {
+    padding: 0px;
+    background-color: #ffddff;
+    float: left;
+    width: 40%;
+}
+
+#instructions {
+    position: absolute;
+    top: 700px;
+    left: 50px;
+    font-size: 20px;
+    font-family: sans-serif;
+}
