@@ -143,7 +143,7 @@ function generateQuestions(p_prompt) {
         for (let i = 0; i < sentences.length; i++) {
             // const sentence = sentences[i].trim();
             const sentence = sentences[i];
-            const sentences[i] = sentence + " Convert this to a question. Limit to one sentence.";
+            sentences[i] = sentence + " Convert this to a question. Limit to one sentence.";
             return sentences;
         }
     }
