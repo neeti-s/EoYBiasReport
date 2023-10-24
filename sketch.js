@@ -70,12 +70,12 @@ function changeToInputField() {
     inputField.size = 75;
     inputField.style.overflow = "auto";
     
-    const buttons = '<button onclick="handleButton1()">Button 1</button>' +
-        '<button onclick="handleButton2()">Button 2</button>' +
-        '<button onclick="handleButton3()">Button 3</button>';
+    // const buttons = '<button onclick="handleButton1()">Button 1</button>' +
+    //     '<button onclick="handleButton2()">Button 2</button>' +
+    //     '<button onclick="handleButton3()">Button 3</button>';
     textDiv.innerHTML = ''; 
     textDiv.appendChild(inputField); 
-    textDiv.appendChild(buttons); 
+    // textDiv.appendChild(buttons); 
 }
 
 //buttons
@@ -98,13 +98,19 @@ async function askForWords(p_prompt) {
     const waitingDiv = document.getElementById("waiting_text");
     waitingDiv.innerHTML = "Waiting for reply from Replicate...";
 
+    let words_response;
+    let assuptions = [];
+
     const isQuestion = p_prompt.endsWith('?');
     if (isQuestion) {
-        const words_response = await requestWordsFromReplicate(generateAssumptions(p_prompt));
+        words_response = await requestWordsFromReplicate(generateAssumptions(p_prompt));
     } else {
         const questions = generateQuestions(p_prompt);
         for (let question in questions) {
-            const words_response = await requestWordsFromReplicate(question);
+            words_response = await requestWordsFromReplicate(question);
+            console.log(words_response);
+            assuptions.push(words_response.output.join(""));
+            console.log(assuptions);
             //create new input box and buttons
         }
     }
