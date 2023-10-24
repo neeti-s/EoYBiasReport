@@ -78,18 +78,18 @@ function changeToInputField() {
     // textDiv.appendChild(buttons); 
 }
 
-//buttons
-function handleButton1() {
-    console.log("Button 1 clicked");
-}
+// //buttons
+// function handleButton1() {
+//     console.log("Button 1 clicked");
+// }
 
-function handleButton2() {
-    console.log("Button 2 clicked");
-}
+// function handleButton2() {
+//     console.log("Button 2 clicked");
+// }
 
-function handleButton3() {
-    console.log("Button 3 clicked");
-}
+// function handleButton3() {
+//     console.log("Button 3 clicked");
+// }
 
 //waiting for response from input field
 async function askForWords(p_prompt) {
@@ -99,20 +99,40 @@ async function askForWords(p_prompt) {
     waitingDiv.innerHTML = "Waiting for reply from Replicate...";
 
     let words_response;
-    let assuptions = [];
 
     const isQuestion = p_prompt.endsWith('?');
     if (isQuestion) {
-        words_response = await requestWordsFromReplicate(generateAssumptions(p_prompt));
+        console.log("question:", p_prompt);
+        // words_response = await requestWordsFromReplicate(generateAssumptions(p_prompt));
+        words_response = generateAssumptions(p_prompt);
+
+        textDiv.innerHTML = words_response;
+        waitingDiv.innerHTML = "Suggested Questions:";
+        changeToInputField();
     } else {
-        const questions = generateQuestions(p_prompt);
-        for (let question in questions) {
-            words_response = await requestWordsFromReplicate(question);
-            console.log(words_response);
-            assuptions.push(words_response.output.join(""));
-            console.log(assuptions);
-            //create new input box and buttons
-        }
+        console.log("assumption:", p_prompt);
+        // try {
+            const questions = await generateQuestions(p_prompt);
+            console.log(questions);
+    
+            for (let i = 0; i < questions.length; i++) {
+                console.log("question:", questions[i]);
+                let words_response = questions[i];
+                textDiv.innerHTML = words_response;
+                waitingDiv.innerHTML = "Suggested Questions:";
+                changeToInputField();
+                // Create new input box and buttons
+            } 
+        // }
+        // catch (error) {
+        //     console.error("Error in askForWords:", error);
+        // }
+
+        // for (let question in questions) {
+        //     words_response = await requestWordsFromReplicate(question);
+        //     assuptions.push(words_response.output.join(""));
+        //     //create new input box and buttons
+        // }
     }
     // const words_response = isQuestion
     //     ? await requestWordsFromReplicate(generateAssuptions(p_prompt))
@@ -121,38 +141,59 @@ async function askForWords(p_prompt) {
     // const initialPrompt = generateAssuptions(p_prompt);
     // const words_response = await requestWordsFromReplicate(initialPrompt);
 
-    if (words_response.output.length === 0) {
-        textDiv.innerHTML = "Something went wrong, try it again";
-    } else {
-        textDiv.innerHTML = words_response.output.join("");
-        waitingDiv.innerHTML = "Suggested Questions:";
-        changeToInputField();
-    }
+    // if (words_response.output.length === 0) {
+    //     textDiv.innerHTML = "Something went wrong, try it again";
+    // } else {
+        // textDiv.innerHTML = words_response.output.join("");
+        // textDiv.innerHTML = words_response;
+        // waitingDiv.innerHTML = "Suggested Questions:";
+        // changeToInputField();
+    // }
 }
 
-function generateAssuptions(p_prompt) {
-    const prompt = requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.") + "Divide this into multiple sentences.";
-    return prompt;
+async function generateAssumptions(p_prompt) {
+    console.log("Entered generateAssumptions")
+    const singleAssumption = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
+    singleAssumption.output.join("");
+    console.log("singleAssuption", singleAssumption);
+    const multipleAssumptions = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
+    multipleAssumptions.output.join("");
+    console.log("multipleAssumptions", multipleAssumptions);
+    return multipleAssumptions;
     // const isQuestion = p_prompt.endsWith('?');
     // return isQuestion
         // ? requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.") + "Divide this into multiple sentences.";
         // : p_prompt + "Convert this to a question. Limit to one sentence.";
 }
 
-function generateQuestions(p_prompt) {
+async function generateQuestions(p_prompt) {
+    console.log("Entered generateQuestions")
     // const isQuestion = p_prompt.endsWith('?');
     // return isQuestion
     //     ? requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.") + "Divide this into multiple sentences.";
         // : p_prompt + "Convert this to a question. Limit to one sentence.";
-    const sentences = p_prompt.match(/[^.!?]+[.!?]+/g);
-    if (sentences) {
-        for (let i = 0; i < sentences.length; i++) {
-            // const sentence = sentences[i].trim();
-            const sentence = sentences[i];
-            sentences[i] = sentence + " Convert this to a question. Limit to one sentence.";
-            return sentences;
-        }
+    const sentences = p_prompt.match(/[^.!]+[.!]+/g);
+    const questions = [];
+    // console.log("sentences", sentences);
+    // console.log("sentences.length", sentences.length);
+    // if (sentences) {
+    for (let i = 0; i < sentences.length; i++) {
+        // const sentence = sentences[i].trim();
+        const sentence = sentences[i];
+        // console.log("sentence", sentence);
+        sentences[i] = await requestWordsFromReplicate(sentence + " Convert this to a question. Limit to one sentence.");
+        // sentences[i] = sentences[i].output.join("");
+        questions.push(sentences[i].output.join(""));
+        // console.log("question", sentences[i]);    
     }
+    console.log("multipleQuestions", questions);
+    return questions;
+    // }
+    // else {
+    //     console.log("singleQuestion", sentence);
+    //     const sentence = await requestWordsFromReplicate(p_prompt + " Convert this to a question. Limit to one sentence.");
+    //     return sentence;
+    // }   
 }
 
 
@@ -175,7 +216,7 @@ async function requestWordsFromReplicate(initialPrompt) {
             max_length: 100,
         },
     };
-    console.log("Asking for Words From Replicate via Proxy", data);
+    // console.log("Asking for Words From Replicate via Proxy", data);
 
     const options = {
         method: "POST",
@@ -187,7 +228,7 @@ async function requestWordsFromReplicate(initialPrompt) {
     };
 
     const url = replicateProxy + "/create_n_get/";
-    console.log("words url", url, "words options", options);
+    // console.log("words url", url, "words options", options);
 
     const words_response = await fetch(url, options);
     console.log("words_response", words_response);
