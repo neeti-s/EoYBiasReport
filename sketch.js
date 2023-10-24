@@ -104,35 +104,24 @@ async function askForWords(p_prompt) {
     if (isQuestion) {
         console.log("question:", p_prompt);
         // words_response = await requestWordsFromReplicate(generateAssumptions(p_prompt));
-        words_response = generateAssumptions(p_prompt);
+        words_response = await generateAssumptions(p_prompt);
 
         textDiv.innerHTML = words_response;
         waitingDiv.innerHTML = "Suggested Questions:";
         changeToInputField();
     } else {
         console.log("assumption:", p_prompt);
-        // try {
-            const questions = await generateQuestions(p_prompt);
-            console.log(questions);
-    
-            for (let i = 0; i < questions.length; i++) {
-                console.log("question:", questions[i]);
-                let words_response = questions[i];
-                textDiv.innerHTML = words_response;
-                waitingDiv.innerHTML = "Suggested Questions:";
-                changeToInputField();
-                // Create new input box and buttons
-            } 
-        // }
-        // catch (error) {
-        //     console.error("Error in askForWords:", error);
-        // }
+        const questions = await generateQuestions(p_prompt);
+        console.log(questions);
 
-        // for (let question in questions) {
-        //     words_response = await requestWordsFromReplicate(question);
-        //     assuptions.push(words_response.output.join(""));
-        //     //create new input box and buttons
-        // }
+        for (let i = 0; i < questions.length; i++) {
+            console.log("question:", questions[i]);
+            let words_response = questions[i];
+            textDiv.innerHTML = words_response;
+            waitingDiv.innerHTML = "Suggested Questions:";
+            changeToInputField();
+            // Create new input box and buttons
+        } 
     }
     // const words_response = isQuestion
     //     ? await requestWordsFromReplicate(generateAssuptions(p_prompt))
@@ -153,11 +142,15 @@ async function askForWords(p_prompt) {
 
 async function generateAssumptions(p_prompt) {
     console.log("Entered generateAssumptions")
-    const singleAssumption = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
-    singleAssumption.output.join("");
+    const singleAssumption = [];
+    const multipleAssumptions = [];
+
+    const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
+    singleAssumption.push(prompt.output.join(""))
     console.log("singleAssuption", singleAssumption);
-    const multipleAssumptions = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
-    multipleAssumptions.output.join("");
+
+    const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
+    multipleAssumptions.push(furtherPrompt.output.join(""))
     console.log("multipleAssumptions", multipleAssumptions);
     return multipleAssumptions;
     // const isQuestion = p_prompt.endsWith('?');
