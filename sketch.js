@@ -73,38 +73,18 @@ function changeToInputField() {
 //waiting for response from input field
 async function askForWords(p_prompt) {
     document.body.style.cursor = "progress";
-    // const textDiv = document.getElementById("resulting_text");
-    // const waitingDiv = document.getElementById("waiting_text");
     waitingDiv.innerHTML = "Waiting for reply from Replicate...";
-
-    // let words_response;
 
     const isQuestion = p_prompt.endsWith('?');
     if (isQuestion) {
         console.log("question:", p_prompt);
-        // await generateAssumptions(p_prompt);
         let newAssumption = await generateAssumptions(p_prompt);
         console.log("newAssumption", newAssumption[0]);
         await generateQuestions(newAssumption[0]);
-        // words_response = await generateAssumptions(p_prompt);
 
-        // textDiv.innerHTML = words_response;
-        // waitingDiv.innerHTML = "Suggested Questions:";
-        // changeToInputField();
     } else {
         console.log("assumption:", p_prompt);
         await generateQuestions(p_prompt);
-        // const questions = await generateQuestions(p_prompt);
-        // console.log(questions);
-
-        // for (let i = 0; i < questions.length; i++) {
-        //     console.log("question:", questions[i]);
-        //     let words_response = questions[i];
-        //     textDiv.innerHTML = words_response;
-        //     waitingDiv.innerHTML = "Suggested Questions:";
-        //     changeToInputField();
-        //     // Create new input box and buttons
-        // } 
     }
 }
 
