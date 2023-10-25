@@ -1,9 +1,19 @@
+/* TO DO:
+1. Database structure
+2. FirebaseAuth
+3. Fix UI
+4. Form */
+
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
 import { getDatabase, ref, onValue, set, push, onChildAdded, onChildChanged, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
+
+//Import Firebase Authentication
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -20,28 +30,89 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+//Initialize Firebase Authentication
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
+
 const analytics = getAnalytics(app);
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
 const db = getDatabase(app);
-const promptInDB = ref(db, "prompts");
+let promptInDB;
+let userInDB;
 
 const textDiv = document.getElementById("resulting_text");
 const waitingDiv = document.getElementById("waiting_text");
 
 init()
 
-function init() {
-    console.log("init");
+//User Authentication
+let nameField = document.getElementById("nameField");
+let username, emailid;
 
-    let nameField = document.getElementById("nameField");
-    let nameFieldTxtBox = document.createElement("input");
-    nameFieldTxtBox.type = "text";
-    nameFieldTxtBox.id = "inputName";
-    nameFieldTxtBox.placeholder = "Enter a username";
-    nameFieldTxtBox.size = 30;
-    nameField.appendChild(nameFieldTxtBox);
-    
+const userSignIn = async() => {
+    signInWithPopup(auth, provider)
+    .then((result) => {
+        const user = result.user;
+        // console.log(user);
+    }).catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+    })
+}
+
+const userSignOut = async() => {
+    signOut(auth).then(() => {
+        alert("You have signed out.")
+    }).catch((error) => {})
+}
+
+onAuthStateChanged(auth, (user) => {
+    if(user) {
+        logoutButton.style.display = "block";
+        loginButton.style.display = "none";
+        username = user.displayName;
+        emailid = user.email;
+        loginMessage.textContent = `You have signed in as ${username} with the email address ${emailid}`
+        loginMessage.style.display = "block";
+        userInDB = ref(db, user.displayName);
+        console.log(userInDB)
+    } else {
+        logoutButton.style.display = "none";
+        loginButton.style.display = "block";
+        loginMessage.style.display = "none";
+    }
+});
+
+//login
+let loginButton = document.createElement("button");
+loginButton.textContent = "Login with Google";
+loginButton.style.backgroundColor = "white";
+loginButton.style.color = "black"; 
+loginButton.style.borderStyle = "solid"; 
+loginButton.addEventListener('click', userSignIn);
+//logout
+let logoutButton = document.createElement("button");
+logoutButton.textContent = "Logout";
+logoutButton.style.backgroundColor = "white";
+logoutButton.style.color = "black"; 
+logoutButton.style.borderStyle = "solid"; 
+logoutButton.addEventListener('click', userSignOut);
+
+logoutButton.style.display = "none";
+
+//Login message
+let loginMessage = document.createElement("div");
+loginMessage.style.display = "none";
+
+// nameField.appendChild(nameFieldTxtBox);
+nameField.appendChild(loginButton);
+nameField.appendChild(logoutButton);
+nameField.appendChild(loginMessage);
+
+
+function init() {
+    console.log("init");    
     let text_container = document.getElementById("text_container");
     let input_field = document.createElement("input");
     input_field.type = "text";
@@ -52,23 +123,26 @@ function init() {
     input_field.addEventListener("keyup", function (event) {
         if (event.key === "Enter") {
             askForWords(input_field.value);
-            push(promptInDB, input_field.value);
+            push(userInDB, input_field.value);
+            promptInDB = ref(userInDB, input_field.value)
+            console.log(promptInDB);
         }
     });
 }
 
-function changeToInputField() {
-    const textDiv = document.getElementById("resulting_text");
-    const inputField = document.createElement("input");
-    inputField.type = "text";
-    inputField.id = "resulting_input";
-    inputField.value = textDiv.innerText;
-    inputField.size = 75;
-    inputField.style.overflow = "auto";
+//TO DELETE:
+// function changeToInputField() {
+//     const textDiv = document.getElementById("resulting_text");
+//     const inputField = document.createElement("input");
+//     inputField.type = "text";
+//     inputField.id = "resulting_input";
+//     inputField.value = textDiv.innerText;
+//     inputField.size = 75;
+//     inputField.style.overflow = "auto";
     
-    textDiv.innerHTML = ''; 
-    textDiv.appendChild(inputField); 
-}
+//     textDiv.innerHTML = ''; 
+//     textDiv.appendChild(inputField); 
+// }
 
 //waiting for response from input field
 async function askForWords(p_prompt) {
@@ -95,7 +169,7 @@ async function generateAssumptions(p_prompt) {
 
     const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
     singleAssumption.push(prompt.output.join(""))
-    console.log("singleAssuption", singleAssumption);
+    console.log("singleAssumption", singleAssumption);
 
     const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
     multipleAssumptions.push(furtherPrompt.output.join(""))
@@ -144,16 +218,28 @@ function createInputBoxWithQuestion(question) {
 
     // Create three buttons
     const button1 = document.createElement("button");
-    button1.textContent = "Gnereate Questions";
+    button1.textContent = "Generate Questions";
     button1.style.backgroundColor = "#1E1A26";
-    
+    button1.addEventListener('click', function() {
+        askForWords(textareaElement.value);
+        //add questions below the question generating
+    })
+
     const button2 = document.createElement("button");
     button2.textContent = "Save to Form";
     button2.style.backgroundColor = "#5D84A6";
+    button2.addEventListener('click', function() {
+        push(promptInDB, textareaElement.value);
+        button2.textContent = "Saved";
+        //how to delete from firebase?
+    })
 
     const button3 = document.createElement("button");
     button3.textContent = "Delete";
     button3.style.backgroundColor = "#593128";
+    button3.addEventListener('click', function() {
+        containerDiv.remove();
+    })
 
     // Create a line break element to put each textarea on a new line
     const lineBreak = document.createElement("br");
