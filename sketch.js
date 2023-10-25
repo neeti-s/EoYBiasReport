@@ -47,7 +47,7 @@ function init() {
     input_field.type = "text";
     input_field.id = "input_prompt";
     input_field.placeholder = "Enter an Assumption";
-    input_field.size = 75;
+    input_field.size = 100;
     text_container.prepend(input_field);
     input_field.addEventListener("keyup", function (event) {
         if (event.key === "Enter") {
@@ -90,8 +90,8 @@ async function askForWords(p_prompt) {
 
 async function generateAssumptions(p_prompt) {
     console.log("Entered generateAssumptions")
-    const singleAssumption = [];
-    const multipleAssumptions = [];
+    let singleAssumption = [];
+    let multipleAssumptions = [];
 
     const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
     singleAssumption.push(prompt.output.join(""))
@@ -110,7 +110,7 @@ async function generateAssumptions(p_prompt) {
 async function generateQuestions(p_prompt) {
     console.log("Entered generateQuestions");
     const sentences = p_prompt.match(/[^.!]+[.!]+/g);
-    const questions = [];
+    let questions = [];
     for (let i = 0; i < sentences.length; i++) {
         const sentence = sentences[i];
         sentences[i] = await requestWordsFromReplicate(sentence + " Convert this to a question. Limit to one sentence.");
@@ -120,14 +120,56 @@ async function generateQuestions(p_prompt) {
 
     for (let i = 0; i < questions.length; i++) {
         console.log("question:", questions[i]);
-        let words_response = questions[i];
-        textDiv.innerHTML = words_response;
-        waitingDiv.innerHTML = "Suggested Questions:";
-        changeToInputField();
+        // let words_response = questions[i];
+        // textDiv.innerHTML = words_response;
+        // waitingDiv.innerHTML = "Suggested Questions:";
+        // changeToInputField();
+        createInputBoxWithQuestion(questions[i]);
         // Create new input box and buttons
     } 
+    waitingDiv.innerHTML = "Suggested Questions:";
     // return questions;
 }
+
+function createInputBoxWithQuestion(question) {
+    // Create a new div element to contain the textarea and buttons
+    const containerDiv = document.createElement("div");
+
+    // Create a new textarea element
+    const textareaElement = document.createElement("textarea");
+    textareaElement.value = question; // Set the content of the textarea
+    textareaElement.style.overflow = "auto"; // Make the textarea resizable
+    textareaElement.style.width = "75ch"; // maximum width
+    textareaElement.style.minHeight = "40px"; // minimum height
+
+    // Create three buttons
+    const button1 = document.createElement("button");
+    button1.textContent = "Gnereate Questions";
+    button1.style.backgroundColor = "#1E1A26";
+    
+    const button2 = document.createElement("button");
+    button2.textContent = "Save to Form";
+    button2.style.backgroundColor = "#5D84A6";
+
+    const button3 = document.createElement("button");
+    button3.textContent = "Delete";
+    button3.style.backgroundColor = "#593128";
+
+    // Create a line break element to put each textarea on a new line
+    const lineBreak = document.createElement("br");
+
+    // Append the textarea, buttons, and line break to the container
+    containerDiv.appendChild(textareaElement);
+    containerDiv.appendChild(button1);
+    containerDiv.appendChild(button2);
+    containerDiv.appendChild(button3);
+    containerDiv.appendChild(lineBreak);
+    containerDiv.appendChild(lineBreak);
+
+    // Append the container to the textDiv
+    textDiv.appendChild(containerDiv);
+}
+
 
 
 async function requestWordsFromReplicate(initialPrompt) {
