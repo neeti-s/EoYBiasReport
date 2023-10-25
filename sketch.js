@@ -81,32 +81,78 @@ function init() {
 
 //waiting for response from input field
 async function askForWords(p_prompt) {
-
     document.body.style.cursor = "progress";
     const textDiv = document.getElementById("resulting_text");
     const waitingDiv = document.getElementById("waiting_text");
     waitingDiv.innerHTML = "Waiting for reply from Replicate...";
 
-    // Check if the prompt is a question.
+    let words_response;
+
     const isQuestion = p_prompt.endsWith('?');
+    if (isQuestion) {
+        console.log("question:", p_prompt);
+        words_response = await generateAssumptions(p_prompt);
 
-    // Define the initial prompt based on whether it's a question or not.
-    let initialPrompt = isQuestion
-        ? p_prompt + "Limit the answer to 50 words."
-        : p_prompt + "Convert this to a question. Limit to one sentence.";
+        textDiv.innerHTML = words_response;
+        waitingDiv.innerHTML = "Suggested Questions:";
+        changeToInputField();
+    } else {
+        console.log("assumption:", p_prompt);
+        const questions = await generateQuestions(p_prompt);
+        console.log(questions);
 
+        for (let i = 0; i < questions.length; i++) {
+            console.log("question:", questions[i]);
+            let words_response = questions[i];
+            textDiv.innerHTML = words_response;
+            waitingDiv.innerHTML = "Suggested Questions:";
+            changeToInputField();
+            // Create new input box and buttons
+        } 
+    }
+}
+
+async function generateAssumptions(p_prompt) {
+    console.log("Entered generateAssumptions")
+    const singleAssumption = [];
+    const multipleAssumptions = [];
+
+    const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
+    singleAssumption.push(prompt.output.join(""))
+    console.log("singleAssuption", singleAssumption);
+
+    const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
+    multipleAssumptions.push(furtherPrompt.output.join(""))
+    console.log("multipleAssumptions", multipleAssumptions);
+    return multipleAssumptions;
+}
+
+async function generateQuestions(p_prompt) {
+    console.log("Entered generateQuestions");
+    const sentences = p_prompt.match(/[^.!]+[.!]+/g);
+    const questions = [];
+    for (let i = 0; i < sentences.length; i++) {
+        const sentence = sentences[i];
+        sentences[i] = await requestWordsFromReplicate(sentence + " Convert this to a question. Limit to one sentence.");
+        questions.push(sentences[i].output.join(""));  
+    }
+    console.log("multipleQuestions", questions);
+    return questions;
+}
+
+
+async function requestWordsFromReplicate(initialPrompt) {
     const data = {
         "version": "35042c9a33ac8fd5e29e27fb3197f33aa483f72c2ce3b0b9d201155c7fd2a287",
         input: {
-            // prompt: p_prompt + "Convert this to a question. Limit to one sentence.",
-            // prompt: p_prompt + "Limit the answer to 50 words.",
-            prompt: initialPrompt, // Updated the prompt here
+            prompt: initialPrompt,
             max_tokens: 100,
             max_length: 100,
         },
     };
-    console.log("Asking for Words From Replicate via Proxy", data);
-    let options = {
+    // console.log("Asking for Words From Replicate via Proxy", data);
+
+    const options = {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -114,20 +160,13 @@ async function askForWords(p_prompt) {
         },
         body: JSON.stringify(data),
     };
-    const url = replicateProxy + "/create_n_get/"
-    console.log("words url", url, "words options", options);
+
+    const url = replicateProxy + "/create_n_get/";
+    // console.log("words url", url, "words options", options);
+
     const words_response = await fetch(url, options);
-    console.log("words_response", words_response);
-    const proxy_said = await words_response.json();
-    if (proxy_said.output.length == 0) {
-        textDiv.innerHTML = "Something went wrong, try it again";
-    } else {
-        textDiv.innerHTML = proxy_said.output.join("");
-        waitingDiv.innerHTML = "Suggested Questions:";
-        // changeToInputField();
-        subscribeToPosts()
-        console.log("proxy_said", proxy_said.output.join(""));
-    }
+    // console.log("words_response", words_response);
+    return await words_response.json();
 }
 
 function subscribeToPosts() {
