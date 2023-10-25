@@ -1,11 +1,11 @@
 //To Do:
-//Namefield submit and disappears - replace the text with name?
-//Space between
-//Submit button for assumption, regenerate button
+//Auth - replace with name printed
+//Submit button for assumption
+//What are the other buttons? Regenerate, push to firebase, delete
 //Generated Questions in input field
-//
-
-
+//question generates question
+//Better UI
+//push to form
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
@@ -32,21 +32,32 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
-const db = getDatabase(app);
-const promptInDB = ref(db, "prompts");
+let db;
+let words_response; 
+let textContainerDiv;
+let name;
+let div;
+let userLoggedIn = false;
+
+document.getElementById("loginButton").addEventListener("click", function() {
+    let username = document.getElementById("usernameInput").value;
+    console.log('login button clicked!')
+    if (username.trim() === '') {
+        alert("Please enter a username.");
+    } else if (username) {
+        let loginForm = document.getElementById("loginForm");
+        let usernameDisplay = document.createElement("div");
+        usernameDisplay.textContent = username;
+        loginForm.appendChild(usernameDisplay);
+        userLoggedIn = true;
+    }
+})
 
 init()
 
 function init() {
     console.log("init");
-
-    let nameField = document.getElementById("nameField");
-    let nameFieldTxtBox = document.createElement("input");
-    nameFieldTxtBox.type = "text";
-    nameFieldTxtBox.id = "inputName";
-    nameFieldTxtBox.placeholder = "Enter a username";
-    nameFieldTxtBox.size = 30;
-    nameField.appendChild(nameFieldTxtBox);
+    db = getDatabase(app);
     
     let text_container = document.getElementById("text_container");
     let input_field = document.createElement("input");
@@ -58,37 +69,14 @@ function init() {
     input_field.addEventListener("keyup", function (event) {
         if (event.key === "Enter") {
             askForWords(input_field.value);
-            push(promptInDB, input_field.value);
+            addToDBList('generated/users', input_field.value);
         }
     });
-}
 
-function changeToInputField() {
-    const textDiv = document.getElementById("resulting_text");
-    const inputField = document.createElement("input");
-    inputField.type = "text";
-    inputField.id = "resulting_input";
-    inputField.value = textDiv.innerText;
-    const buttons = '<button onclick="handleButton1()">Button 1</button>' +
-        '<button onclick="handleButton2()">Button 2</button>' +
-        '<button onclick="handleButton3()">Button 3</button>';
-    textDiv.innerHTML = ''; 
-    textDiv.appendChild(inputField); 
-    textDiv.appendChild(buttons); 
+    textContainerDiv = document.createElement('div');
+    document.body.append(textContainerDiv);
+    document.body.append(input_field);
 
-}
-
-//buttons
-function handleButton1() {
-    console.log("Button 1 clicked");
-}
-
-function handleButton2() {
-    console.log("Button 2 clicked");
-}
-
-function handleButton3() {
-    console.log("Button 3 clicked");
 }
 
 //waiting for response from input field
@@ -136,7 +124,134 @@ async function askForWords(p_prompt) {
     } else {
         textDiv.innerHTML = proxy_said.output.join("");
         waitingDiv.innerHTML = "Suggested Questions:";
-        changeToInputField();
+        // changeToInputField();
+        subscribeToPosts()
         console.log("proxy_said", proxy_said.output.join(""));
     }
 }
+
+function subscribeToPosts() {
+
+    const commentsRef = ref(db, 'generated/users');
+    onChildAdded(commentsRef, (data) => {
+        console.log("added", data.key, data.val());
+        changeToInputField(data.key, data.val());
+    });
+
+    onChildChanged(commentsRef, (data) => {
+
+        const element = document.getElementById(data.key);
+        element.innerHTML = data.val().text;
+        console.log("changed", data.key, data.val(), element);
+    });
+
+    onChildRemoved(commentsRef, (data) => {
+        console.log("removed", data.key, data.val());
+    });
+
+}
+
+
+function changeToInputField(key, data) {
+    let textDiv = document.getElementById(key);
+    if (textDiv) {
+        textDiv.innerHTML = data.text;
+    } else {
+        let inputField = document.createElement("input");
+        inputField.id = key;
+        inputField.style.overflow = "auto";
+        inputField.style.resize = "both";
+        inputField.setAttribute("contenteditable", true);
+        inputField.style.width = "90%";
+        inputField.style.height = "100px";
+        inputField.innerHTML = data.text;
+        inputField.type = "text";
+        // div.addEventListener('blur', function (event) {  
+        //     let content = event.target.innerHTML.split(":")[1].trim();
+        //     console.log("blur", content);
+        //     set(ref(db, 'generated/users/' + key), {
+        //         "username": name,
+        //         "prompt": content,
+        //     });
+        // });
+        textContainerDiv.appendChild(inputField); 
+
+        let button1 = document.createElement("button");
+        button1.textContent = "Button 1";
+        button1.addEventListener("click", handleButton1);
+        textContainerDiv.appendChild(button1);
+
+        let button2 = document.createElement("button");
+        button2.textContent = "Button 2";
+        button2.addEventListener("click", handleButton2);
+        textContainerDiv.appendChild(button2);
+
+        let button3 = document.createElement("button");
+        button3.textContent = "Button 3";
+        button3.addEventListener("click", handleButton3);
+        textContainerDiv.appendChild(button3);
+
+    }
+}
+
+// function changeToInputField() {
+//     const textDiv = document.getElementById("resulting_text");
+//     const inputField = document.createElement("input");
+//     inputField.type = "text";
+//     inputField.id = "resulting_input";
+//     inputField.value = textDiv.innerText;
+//     textDiv.innerHTML = ''; 
+//     textDiv.appendChild(inputField); 
+
+// }
+
+//buttons
+function handleButton1() {
+    console.log("Button 1 clicked");
+}
+
+function handleButton2() {
+    console.log("Button 2 clicked");
+}
+
+function handleButton3() {
+    console.log("Button 3 clicked");
+}
+
+function writeUserData(userId, name, email, imageUrl) {
+    const db = getDatabase();
+    set(ref(db, 'generated/users/' + userId), {
+        username: name,
+        email: email,
+    });
+}
+
+function askForExistingUser(name) {
+    const db = getDatabase();
+    const usersRef = ref(db, 'generated/users/' + name);
+    console.log("usersRef", usersRef);
+    onValue(usersRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+            console.log("new user");
+            const db = getDatabase();
+            set(ref(db, 'generated/users/' + name), {
+                username: name
+            });
+        }
+        console.log("from database", data);
+    });
+}
+
+function addToDBList(address, newText) {
+    // Create a new post reference with an auto-generated id
+    const db = getDatabase();
+    const postListRef = ref(db, address);
+    const newPostRef = push(postListRef);
+    set(newPostRef, {
+        username: newText,
+        timestamp: Date.now(),
+        // text: newText
+    });
+
+};
