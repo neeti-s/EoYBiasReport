@@ -166,14 +166,6 @@ function changeToInputField(key, data) {
         inputField.style.height = "100px";
         inputField.innerHTML = data.text;
         inputField.type = "text";
-        // div.addEventListener('blur', function (event) {  
-        //     let content = event.target.innerHTML.split(":")[1].trim();
-        //     console.log("blur", content);
-        //     set(ref(db, 'generated/users/' + key), {
-        //         "username": name,
-        //         "prompt": content,
-        //     });
-        // });
         textContainerDiv.appendChild(inputField); 
 
         let button1 = document.createElement("button");
@@ -193,17 +185,6 @@ function changeToInputField(key, data) {
 
     }
 }
-
-// function changeToInputField() {
-//     const textDiv = document.getElementById("resulting_text");
-//     const inputField = document.createElement("input");
-//     inputField.type = "text";
-//     inputField.id = "resulting_input";
-//     inputField.value = textDiv.innerText;
-//     textDiv.innerHTML = ''; 
-//     textDiv.appendChild(inputField); 
-
-// }
 
 //buttons
 function handleButton1() {
@@ -251,7 +232,6 @@ function addToDBList(address, newText) {
     set(newPostRef, {
         username: newText,
         timestamp: Date.now(),
-        // text: newText
     });
 
 };
