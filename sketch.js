@@ -50,6 +50,18 @@ init()
 let nameField = document.getElementById("nameField");
 let username, emailid;
 
+//Preview Form
+let previewForm = document.getElementById("previewForm");
+let formButton = document.createElement("button");
+formButton.textContent = "Preview Form";
+formButton.style.backgroundColor = "white";
+formButton.style.color = "black"; 
+formButton.style.backgroundColor = "#D3D3D3"; 
+formButton.addEventListener('click', () => {
+    window.open(`${location.href}/form.html`)
+})
+previewForm.appendChild(formButton);
+
 const userSignIn = async() => {
     signInWithPopup(auth, provider)
     .then((result) => {
@@ -124,8 +136,8 @@ function init() {
         if (event.key === "Enter") {
             askForWords(input_field.value);
             push(userInDB, input_field.value);
-            promptInDB = ref(userInDB, input_field.value)
-            console.log(promptInDB);
+            // promptInDB = ref(userInDB, input_field.value)
+            // console.log(promptInDB);
         }
     });
 }
@@ -229,7 +241,7 @@ function createInputBoxWithQuestion(question) {
     button2.textContent = "Save to Form";
     button2.style.backgroundColor = "#5D84A6";
     button2.addEventListener('click', function() {
-        push(promptInDB, textareaElement.value);
+        push(userInDB, textareaElement.value);
         button2.textContent = "Saved";
         //how to delete from firebase?
     })
