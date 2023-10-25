@@ -1,12 +1,3 @@
-//To Do:
-//Auth - replace with name printed
-//Submit button for assumption
-//What are the other buttons? Regenerate, push to firebase, delete
-//Generated Questions in input field
-//question generates question
-//Better UI
-//push to form
-
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
@@ -32,90 +23,75 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
-let db;
-let words_response; 
-let textContainerDiv;
-let name;
-let div;
-let userLoggedIn = false;
+const db = getDatabase(app);
+const promptInDB = ref(db, "prompts");
 
-document.getElementById("loginButton").addEventListener("click", function() {
-    let username = document.getElementById("usernameInput").value;
-    console.log('login button clicked!')
-    if (username.trim() === '') {
-        alert("Please enter a username.");
-    } else if (username) {
-        let loginForm = document.getElementById("loginForm");
-        let usernameDisplay = document.createElement("div");
-        usernameDisplay.textContent = username;
-        loginForm.appendChild(usernameDisplay);
-        userLoggedIn = true;
-    }
-})
+const textDiv = document.getElementById("resulting_text");
+const waitingDiv = document.getElementById("waiting_text");
 
 init()
 
 function init() {
     console.log("init");
-    db = getDatabase(app);
+
+    let nameField = document.getElementById("nameField");
+    let nameFieldTxtBox = document.createElement("input");
+    nameFieldTxtBox.type = "text";
+    nameFieldTxtBox.id = "inputName";
+    nameFieldTxtBox.placeholder = "Enter a username";
+    nameFieldTxtBox.size = 30;
+    nameField.appendChild(nameFieldTxtBox);
     
     let text_container = document.getElementById("text_container");
     let input_field = document.createElement("input");
     input_field.type = "text";
     input_field.id = "input_prompt";
     input_field.placeholder = "Enter an Assumption";
-    input_field.size = 75;
+    input_field.size = 100;
     text_container.prepend(input_field);
     input_field.addEventListener("keyup", function (event) {
         if (event.key === "Enter") {
             askForWords(input_field.value);
-            addToDBList('generated/users', input_field.value);
+            push(promptInDB, input_field.value);
         }
     });
+}
 
-    textContainerDiv = document.createElement('div');
-    document.body.append(textContainerDiv);
-    document.body.append(input_field);
-
+function changeToInputField() {
+    const textDiv = document.getElementById("resulting_text");
+    const inputField = document.createElement("input");
+    inputField.type = "text";
+    inputField.id = "resulting_input";
+    inputField.value = textDiv.innerText;
+    inputField.size = 75;
+    inputField.style.overflow = "auto";
+    
+    textDiv.innerHTML = ''; 
+    textDiv.appendChild(inputField); 
 }
 
 //waiting for response from input field
 async function askForWords(p_prompt) {
     document.body.style.cursor = "progress";
-    const textDiv = document.getElementById("resulting_text");
-    const waitingDiv = document.getElementById("waiting_text");
     waitingDiv.innerHTML = "Waiting for reply from Replicate...";
-
-    let words_response;
 
     const isQuestion = p_prompt.endsWith('?');
     if (isQuestion) {
         console.log("question:", p_prompt);
-        words_response = await generateAssumptions(p_prompt);
+        let newAssumption = await generateAssumptions(p_prompt);
+        console.log("newAssumption", newAssumption[0]);
+        await generateQuestions(newAssumption[0]);
 
-        textDiv.innerHTML = words_response;
-        waitingDiv.innerHTML = "Suggested Questions:";
-        changeToInputField();
     } else {
         console.log("assumption:", p_prompt);
-        const questions = await generateQuestions(p_prompt);
-        console.log(questions);
-
-        for (let i = 0; i < questions.length; i++) {
-            console.log("question:", questions[i]);
-            let words_response = questions[i];
-            textDiv.innerHTML = words_response;
-            waitingDiv.innerHTML = "Suggested Questions:";
-            changeToInputField();
-            // Create new input box and buttons
-        } 
+        await generateQuestions(p_prompt);
     }
 }
 
 async function generateAssumptions(p_prompt) {
     console.log("Entered generateAssumptions")
-    const singleAssumption = [];
-    const multipleAssumptions = [];
+    let singleAssumption = [];
+    let multipleAssumptions = [];
 
     const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
     singleAssumption.push(prompt.output.join(""))
@@ -124,21 +100,76 @@ async function generateAssumptions(p_prompt) {
     const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
     multipleAssumptions.push(furtherPrompt.output.join(""))
     console.log("multipleAssumptions", multipleAssumptions);
+
+    // textDiv.innerHTML = multipleAssumptions;
+    // waitingDiv.innerHTML = "Suggested Questions:";
+    // changeToInputField();
     return multipleAssumptions;
 }
 
 async function generateQuestions(p_prompt) {
     console.log("Entered generateQuestions");
     const sentences = p_prompt.match(/[^.!]+[.!]+/g);
-    const questions = [];
+    let questions = [];
     for (let i = 0; i < sentences.length; i++) {
         const sentence = sentences[i];
         sentences[i] = await requestWordsFromReplicate(sentence + " Convert this to a question. Limit to one sentence.");
         questions.push(sentences[i].output.join(""));  
     }
     console.log("multipleQuestions", questions);
-    return questions;
+
+    for (let i = 0; i < questions.length; i++) {
+        console.log("question:", questions[i]);
+        // let words_response = questions[i];
+        // textDiv.innerHTML = words_response;
+        // waitingDiv.innerHTML = "Suggested Questions:";
+        // changeToInputField();
+        createInputBoxWithQuestion(questions[i]);
+        // Create new input box and buttons
+    } 
+    waitingDiv.innerHTML = "Suggested Questions:";
+    // return questions;
 }
+
+function createInputBoxWithQuestion(question) {
+    // Create a new div element to contain the textarea and buttons
+    const containerDiv = document.createElement("div");
+
+    // Create a new textarea element
+    const textareaElement = document.createElement("textarea");
+    textareaElement.value = question; // Set the content of the textarea
+    textareaElement.style.overflow = "auto"; // Make the textarea resizable
+    textareaElement.style.width = "75ch"; // maximum width
+    textareaElement.style.minHeight = "40px"; // minimum height
+
+    // Create three buttons
+    const button1 = document.createElement("button");
+    button1.textContent = "Gnereate Questions";
+    button1.style.backgroundColor = "#1E1A26";
+    
+    const button2 = document.createElement("button");
+    button2.textContent = "Save to Form";
+    button2.style.backgroundColor = "#5D84A6";
+
+    const button3 = document.createElement("button");
+    button3.textContent = "Delete";
+    button3.style.backgroundColor = "#593128";
+
+    // Create a line break element to put each textarea on a new line
+    const lineBreak = document.createElement("br");
+
+    // Append the textarea, buttons, and line break to the container
+    containerDiv.appendChild(textareaElement);
+    containerDiv.appendChild(button1);
+    containerDiv.appendChild(button2);
+    containerDiv.appendChild(button3);
+    containerDiv.appendChild(lineBreak);
+    containerDiv.appendChild(lineBreak);
+
+    // Append the container to the textDiv
+    textDiv.appendChild(containerDiv);
+}
+
 
 
 async function requestWordsFromReplicate(initialPrompt) {
@@ -168,109 +199,3 @@ async function requestWordsFromReplicate(initialPrompt) {
     // console.log("words_response", words_response);
     return await words_response.json();
 }
-
-function subscribeToPosts() {
-
-    const commentsRef = ref(db, 'generated/users');
-    onChildAdded(commentsRef, (data) => {
-        console.log("added", data.key, data.val());
-        changeToInputField(data.key, data.val());
-    });
-
-    onChildChanged(commentsRef, (data) => {
-
-        const element = document.getElementById(data.key);
-        element.innerHTML = data.val().text;
-        console.log("changed", data.key, data.val(), element);
-    });
-
-    onChildRemoved(commentsRef, (data) => {
-        console.log("removed", data.key, data.val());
-    });
-
-}
-
-
-function changeToInputField(key, data) {
-    let textDiv = document.getElementById(key);
-    if (textDiv) {
-        textDiv.innerHTML = data.text;
-    } else {
-        let inputField = document.createElement("input");
-        inputField.id = key;
-        inputField.style.overflow = "auto";
-        inputField.style.resize = "both";
-        inputField.setAttribute("contenteditable", true);
-        inputField.style.width = "90%";
-        inputField.style.height = "100px";
-        inputField.innerHTML = data.text;
-        inputField.type = "text";
-        textContainerDiv.appendChild(inputField); 
-
-        let button1 = document.createElement("button");
-        button1.textContent = "Button 1";
-        button1.addEventListener("click", handleButton1);
-        textContainerDiv.appendChild(button1);
-
-        let button2 = document.createElement("button");
-        button2.textContent = "Button 2";
-        button2.addEventListener("click", handleButton2);
-        textContainerDiv.appendChild(button2);
-
-        let button3 = document.createElement("button");
-        button3.textContent = "Button 3";
-        button3.addEventListener("click", handleButton3);
-        textContainerDiv.appendChild(button3);
-
-    }
-}
-
-//buttons
-function handleButton1() {
-    console.log("Button 1 clicked");
-}
-
-function handleButton2() {
-    console.log("Button 2 clicked");
-}
-
-function handleButton3() {
-    console.log("Button 3 clicked");
-}
-
-function writeUserData(userId, name, email, imageUrl) {
-    const db = getDatabase();
-    set(ref(db, 'generated/users/' + userId), {
-        username: name,
-        email: email,
-    });
-}
-
-function askForExistingUser(name) {
-    const db = getDatabase();
-    const usersRef = ref(db, 'generated/users/' + name);
-    console.log("usersRef", usersRef);
-    onValue(usersRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data) {
-            console.log("new user");
-            const db = getDatabase();
-            set(ref(db, 'generated/users/' + name), {
-                username: name
-            });
-        }
-        console.log("from database", data);
-    });
-}
-
-function addToDBList(address, newText) {
-    // Create a new post reference with an auto-generated id
-    const db = getDatabase();
-    const postListRef = ref(db, address);
-    const newPostRef = push(postListRef);
-    set(newPostRef, {
-        username: newText,
-        timestamp: Date.now(),
-    });
-
-};
