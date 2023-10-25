@@ -1,10 +1,3 @@
-//To Do:
-//Namefield submit and disappears - replace the text with name?
-//Space between
-//Submit button for assumption, regenerate button
-//Generated Questions in input field
-//
-
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
@@ -70,26 +63,9 @@ function changeToInputField() {
     inputField.size = 75;
     inputField.style.overflow = "auto";
     
-    // const buttons = '<button onclick="handleButton1()">Button 1</button>' +
-    //     '<button onclick="handleButton2()">Button 2</button>' +
-    //     '<button onclick="handleButton3()">Button 3</button>';
     textDiv.innerHTML = ''; 
     textDiv.appendChild(inputField); 
-    // textDiv.appendChild(buttons); 
 }
-
-// //buttons
-// function handleButton1() {
-//     console.log("Button 1 clicked");
-// }
-
-// function handleButton2() {
-//     console.log("Button 2 clicked");
-// }
-
-// function handleButton3() {
-//     console.log("Button 3 clicked");
-// }
 
 //waiting for response from input field
 async function askForWords(p_prompt) {
@@ -103,7 +79,6 @@ async function askForWords(p_prompt) {
     const isQuestion = p_prompt.endsWith('?');
     if (isQuestion) {
         console.log("question:", p_prompt);
-        // words_response = await requestWordsFromReplicate(generateAssumptions(p_prompt));
         words_response = await generateAssumptions(p_prompt);
 
         textDiv.innerHTML = words_response;
@@ -123,21 +98,6 @@ async function askForWords(p_prompt) {
             // Create new input box and buttons
         } 
     }
-    // const words_response = isQuestion
-    //     ? await requestWordsFromReplicate(generateAssuptions(p_prompt))
-    //     : for (sentence in sentences) await requestWordsFromReplicate(generateQuestions(p_prompt));
-
-    // const initialPrompt = generateAssuptions(p_prompt);
-    // const words_response = await requestWordsFromReplicate(initialPrompt);
-
-    // if (words_response.output.length === 0) {
-    //     textDiv.innerHTML = "Something went wrong, try it again";
-    // } else {
-        // textDiv.innerHTML = words_response.output.join("");
-        // textDiv.innerHTML = words_response;
-        // waitingDiv.innerHTML = "Suggested Questions:";
-        // changeToInputField();
-    // }
 }
 
 async function generateAssumptions(p_prompt) {
@@ -153,51 +113,20 @@ async function generateAssumptions(p_prompt) {
     multipleAssumptions.push(furtherPrompt.output.join(""))
     console.log("multipleAssumptions", multipleAssumptions);
     return multipleAssumptions;
-    // const isQuestion = p_prompt.endsWith('?');
-    // return isQuestion
-        // ? requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.") + "Divide this into multiple sentences.";
-        // : p_prompt + "Convert this to a question. Limit to one sentence.";
 }
 
 async function generateQuestions(p_prompt) {
-    console.log("Entered generateQuestions")
-    // const isQuestion = p_prompt.endsWith('?');
-    // return isQuestion
-    //     ? requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.") + "Divide this into multiple sentences.";
-        // : p_prompt + "Convert this to a question. Limit to one sentence.";
+    console.log("Entered generateQuestions");
     const sentences = p_prompt.match(/[^.!]+[.!]+/g);
     const questions = [];
-    // console.log("sentences", sentences);
-    // console.log("sentences.length", sentences.length);
-    // if (sentences) {
     for (let i = 0; i < sentences.length; i++) {
-        // const sentence = sentences[i].trim();
         const sentence = sentences[i];
-        // console.log("sentence", sentence);
         sentences[i] = await requestWordsFromReplicate(sentence + " Convert this to a question. Limit to one sentence.");
-        // sentences[i] = sentences[i].output.join("");
-        questions.push(sentences[i].output.join(""));
-        // console.log("question", sentences[i]);    
+        questions.push(sentences[i].output.join(""));  
     }
     console.log("multipleQuestions", questions);
     return questions;
-    // }
-    // else {
-    //     console.log("singleQuestion", sentence);
-    //     const sentence = await requestWordsFromReplicate(p_prompt + " Convert this to a question. Limit to one sentence.");
-    //     return sentence;
-    // }   
 }
-
-
-
-// // Check if the prompt is a question.
-// const isQuestion = p_prompt.endsWith('?');
-
-// // Define the initial prompt based on whether it's a question or not.
-// let initialPrompt = isQuestion
-//     ? p_prompt + "Limit the answer to 50 words."
-//     : p_prompt + "Convert this to a question. Limit to one sentence.";
 
 
 async function requestWordsFromReplicate(initialPrompt) {
@@ -224,7 +153,6 @@ async function requestWordsFromReplicate(initialPrompt) {
     // console.log("words url", url, "words options", options);
 
     const words_response = await fetch(url, options);
-    console.log("words_response", words_response);
-
+    // console.log("words_response", words_response);
     return await words_response.json();
 }
