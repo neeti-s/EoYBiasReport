@@ -63,19 +63,6 @@ function init() {
     });
 }
 
-// function changeToInputField() {
-//     const textDiv = document.getElementById("resulting_text");
-//     const inputField = document.createElement("input");
-//     inputField.type = "text";
-//     inputField.id = "resulting_input";
-//     inputField.value = textDiv.innerText;
-//     inputField.size = 75;
-//     inputField.style.overflow = "auto";
-    
-//     textDiv.innerHTML = ''; 
-//     textDiv.appendChild(inputField); 
-// }
-
 //waiting for response from input field
 async function askForWords(p_prompt) {
     document.body.style.cursor = "progress";
@@ -126,15 +113,8 @@ async function generateQuestions(p_prompt) {
 
     for (let i = 0; i < questions.length; i++) {
         console.log("question:", questions[i]);
-        // let words_response = questions[i];
-        // textDiv.innerHTML = words_response;
-        // waitingDiv.innerHTML = "Suggested Questions:";
-        // changeToInputField();
         questions[i] = questions[i].replace(/"/g, ''); // Removes all double quotes from the string
-        createInputBoxWithQuestion(questions[i]);
-        
-
-        // Create new input box and buttons
+        createInputBoxWithQuestion(questions[i]); // Create new input box and buttons for each question
     } 
     waitingDiv.innerHTML = "Suggested Questions:";
     // return questions;
