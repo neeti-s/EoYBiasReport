@@ -53,14 +53,35 @@ function init() {
     input_field.type = "text";
     input_field.id = "input_prompt";
     input_field.placeholder = "Enter an Assumption";
-    input_field.size = 100;
+    input_field.style.width = "75ch";
+    input_field.style.minHeight = "40px";
+    input_field.style.display = "block";
     text_container.append(input_field);
-    input_field.addEventListener("keyup", function (event) {
-        if (event.key === "Enter") {
-            askForWords(input_field.value);
-            push(promptInDB, input_field.value);
-        }
+
+    // Add buttons
+    let submitButton = document.createElement("button");
+    submitButton.textContent = "Generate Questions";
+    submitButton.style.backgroundColor = "#1E1A26";
+    submitButton.addEventListener("click", function () {
+        askForWords(input_field.value);
+        push(promptInDB, input_field.value);
     });
+
+    let clearButton = document.createElement("button");
+    clearButton.textContent = "Clear";
+    clearButton.style.backgroundColor = "#593128";
+    clearButton.addEventListener("click", function () {
+        input_field.value = "";
+    });
+
+    text_container.appendChild(submitButton);
+    text_container.appendChild(clearButton);
+    // input_field.addEventListener("keyup", function (event) {
+    //     if (event.key === "Enter") {
+    //         askForWords(input_field.value);
+    //         push(promptInDB, input_field.value);
+    //     }
+    // });
 }
 
 //waiting for response from input field
@@ -135,7 +156,7 @@ function createInputBoxWithQuestion(question) {
     const button1 = document.createElement("button");
     button1.textContent = "Gnereate Questions";
     button1.style.backgroundColor = "#1E1A26";
-    button1.addEventListener("click", function () {
+    button1.addEventListener("click", function (event) {
         const textAreaValue = textareaElement.value; // Get the content of the associated textarea
         askForWords(textAreaValue); // Call generateQuestions function with the textarea content
     });
@@ -161,6 +182,9 @@ function createInputBoxWithQuestion(question) {
 
     // Append the container to the textDiv
     textDiv.appendChild(containerDiv);
+
+    // Append the container just after the parent container
+    // parentContainer.insertAdjacentElement('afterend', containerDiv);
 }
 
 
