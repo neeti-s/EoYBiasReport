@@ -54,7 +54,7 @@ function init() {
     input_field.id = "input_prompt";
     input_field.placeholder = "Enter an Assumption";
     input_field.size = 100;
-    text_container.prepend(input_field);
+    text_container.append(input_field);
     input_field.addEventListener("keyup", function (event) {
         if (event.key === "Enter") {
             askForWords(input_field.value);
