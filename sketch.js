@@ -1,9 +1,13 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-import { getDatabase, ref, onValue, set, push, onChildAdded, onChildChanged, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { getDatabase, ref, set, push, query, equalTo, orderByChild, onChildAdded, onChildChanged, onChildRemoved, onValue} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
+
+// Import the Firebase Authentication-related functions
+import { checkForUserInRegularDB, giveAuthUserRegularDBEntry } from "./firebase-auth.js";
+
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -28,6 +32,8 @@ const promptInDB = ref(db, "prompts");
 
 const textDiv = document.getElementById("resulting_text");
 const waitingDiv = document.getElementById("waiting_text");
+
+// connectToFirebaseAuth();
 
 init()
 
@@ -57,18 +63,18 @@ function init() {
     });
 }
 
-function changeToInputField() {
-    const textDiv = document.getElementById("resulting_text");
-    const inputField = document.createElement("input");
-    inputField.type = "text";
-    inputField.id = "resulting_input";
-    inputField.value = textDiv.innerText;
-    inputField.size = 75;
-    inputField.style.overflow = "auto";
+// function changeToInputField() {
+//     const textDiv = document.getElementById("resulting_text");
+//     const inputField = document.createElement("input");
+//     inputField.type = "text";
+//     inputField.id = "resulting_input";
+//     inputField.value = textDiv.innerText;
+//     inputField.size = 75;
+//     inputField.style.overflow = "auto";
     
-    textDiv.innerHTML = ''; 
-    textDiv.appendChild(inputField); 
-}
+//     textDiv.innerHTML = ''; 
+//     textDiv.appendChild(inputField); 
+// }
 
 //waiting for response from input field
 async function askForWords(p_prompt) {
@@ -124,7 +130,10 @@ async function generateQuestions(p_prompt) {
         // textDiv.innerHTML = words_response;
         // waitingDiv.innerHTML = "Suggested Questions:";
         // changeToInputField();
+        questions[i] = questions[i].replace(/"/g, ''); // Removes all double quotes from the string
         createInputBoxWithQuestion(questions[i]);
+        
+
         // Create new input box and buttons
     } 
     waitingDiv.innerHTML = "Suggested Questions:";
@@ -146,6 +155,10 @@ function createInputBoxWithQuestion(question) {
     const button1 = document.createElement("button");
     button1.textContent = "Gnereate Questions";
     button1.style.backgroundColor = "#1E1A26";
+    button1.addEventListener("click", function () {
+        const textAreaValue = textareaElement.value; // Get the content of the associated textarea
+        askForWords(textAreaValue); // Call generateQuestions function with the textarea content
+    });
     
     const button2 = document.createElement("button");
     button2.textContent = "Save to Form";
