@@ -1,9 +1,3 @@
-/* TO DO:
-1. Database structure
-2. FirebaseAuth
-3. Fix UI
-4. Form */
-
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
@@ -27,7 +21,7 @@ const firebaseConfig = {
   appId: "1:695121006555:web:def24557c0ffb9bed521fe",
   measurementId: "G-88SJ1NTH56"
 };
-
+ 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 //Initialize Firebase Authentication
@@ -39,7 +33,11 @@ const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
 const db = getDatabase(app);
 let promptInDB;
-let userInDB;
+let userInDB; //create user folder
+let projectInDB; //create project folder
+let projectFolder;
+let assumptionInDB; //create assumption folder in project folder
+let questionInDB; //create question folder in project folder
 
 const textDiv = document.getElementById("resulting_text");
 const waitingDiv = document.getElementById("waiting_text");
@@ -50,18 +48,39 @@ init()
 let nameField = document.getElementById("nameField");
 let username, emailid;
 
+//Project Name
+let projectTitle = document.getElementById("projectTitle");
+let projectTitleEntry = document.createElement("input");
+projectTitleEntry.placeholder = "Enter a Project Name";
+let projectTitleButton = document.createElement("button");
+projectTitleButton.textContent = "Save";
+projectTitleButton.style.backgroundColor = "white";
+projectTitleButton.style.color = "black"; 
+projectTitleButton.style.borderStyle = "solid"; 
+projectTitle.appendChild(projectTitleEntry);
+projectTitle.appendChild(projectTitleButton);
+projectTitleButton.addEventListener('click', () => {
+        projectFolder = projectTitleEntry.value
+        // push(userInDB, projectTitleEntry.value);
+        console.log(username);
+        console.log(projectFolder)
+        assumptionInDB = ref(db, username + '/' + projectFolder + '/assumptions')
+        questionInDB = ref(db, username + '/' + projectFolder + '/questions')
+        
+});
+
 //Preview Form
-let previewForm = document.getElementById("previewForm");
 let formButton = document.createElement("button");
 formButton.textContent = "Preview Form";
 formButton.style.backgroundColor = "white";
 formButton.style.color = "black"; 
-formButton.style.backgroundColor = "#D3D3D3"; 
+formButton.style.borderStyle = "solid"; 
 formButton.addEventListener('click', () => {
     window.open(`${location.href}/form.html`)
 })
-previewForm.appendChild(formButton);
+projectTitle.appendChild(formButton);
 
+//Login Functions
 const userSignIn = async() => {
     signInWithPopup(auth, provider)
     .then((result) => {
@@ -88,7 +107,7 @@ onAuthStateChanged(auth, (user) => {
         loginMessage.textContent = `You have signed in as ${username} with the email address ${emailid}`
         loginMessage.style.display = "block";
         userInDB = ref(db, user.displayName);
-        console.log(userInDB)
+        // console.log(userInDB)
     } else {
         logoutButton.style.display = "none";
         loginButton.style.display = "block";
@@ -135,26 +154,12 @@ function init() {
     input_field.addEventListener("keyup", function (event) {
         if (event.key === "Enter") {
             askForWords(input_field.value);
-            push(userInDB, input_field.value);
+            push(assumptionInDB, input_field.value);
             // promptInDB = ref(userInDB, input_field.value)
             // console.log(promptInDB);
         }
     });
 }
-
-//TO DELETE:
-// function changeToInputField() {
-//     const textDiv = document.getElementById("resulting_text");
-//     const inputField = document.createElement("input");
-//     inputField.type = "text";
-//     inputField.id = "resulting_input";
-//     inputField.value = textDiv.innerText;
-//     inputField.size = 75;
-//     inputField.style.overflow = "auto";
-    
-//     textDiv.innerHTML = ''; 
-//     textDiv.appendChild(inputField); 
-// }
 
 //waiting for response from input field
 async function askForWords(p_prompt) {
@@ -241,7 +246,7 @@ function createInputBoxWithQuestion(question) {
     button2.textContent = "Save to Form";
     button2.style.backgroundColor = "#5D84A6";
     button2.addEventListener('click', function() {
-        push(userInDB, textareaElement.value);
+        push(questionInDB, textareaElement.value);
         button2.textContent = "Saved";
         //how to delete from firebase?
     })
