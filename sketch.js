@@ -1,4 +1,4 @@
-import { initializeFirebase } from './firebaseConfig.js';
+import { initializeFirebase } from './firebaseAuth.js';
 
 fetch('firebaseConfig.json')
     .then(response => response.json())
