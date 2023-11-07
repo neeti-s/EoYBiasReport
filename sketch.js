@@ -142,6 +142,10 @@ async function generateQuestions(p_prompt) {
 }
 
 function createInputBoxWithQuestion(question) {
+    // function createInputBoxWithQuestion(question, clickedButton) {
+    // Get the parent container of the clicked button
+    // const parentContainer = clickedButton.parentElement;
+
     // Create a new div element to contain the textarea and buttons
     const containerDiv = document.createElement("div");
 
