@@ -1,102 +1,119 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-import { getDatabase, ref, set, push, query, equalTo, orderByChild, onChildAdded, onChildChanged, onChildRemoved, onValue} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// // Import the functions you need from the SDKs you need
+// import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+// import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+// import { getDatabase, ref, set, push, query, equalTo, orderByChild, onChildAdded, onChildChanged, onChildRemoved, onValue} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+// // TODO: Add SDKs for Firebase products that you want to use
+// // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Import the Firebase Authentication-related functions
-import { checkForUserInRegularDB, giveAuthUserRegularDBEntry } from "./firebase-auth.js";
+// // Import the Firebase Authentication-related functions
+// import { checkForUserInRegularDB, giveAuthUserRegularDBEntry } from "./firebaseConfig.js";
 
 
-//Import Firebase Authentication
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-
+// //Import Firebase Authentication
+// import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+import { initializeFirebase } from './firebaseConfig.js';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 // let app;
+
+// fetch('firebaseConfig.json')
+//    .then(response => response.json())
+//    .then(data => {
+//         // Initialize Firebase using the loaded configuration
+//         const app = initializeApp(data);
+
+//         //  Initialize Firebase Authentication
+//         //  const auth = getAuth();
+//         const auth = getAuth(app);
+//         const db = getDatabase(app);
+//         const provider = new GoogleAuthProvider();
+//         const analytics = getAnalytics(app);
+
+//         //User Authentication
+//         let nameField = document.getElementById("nameField");
+//         let username, emailid;
+
+//         //Login Functions
+//         const userSignIn = async() => {
+//             signInWithPopup(auth, provider)
+//             .then((result) => {
+//                 const user = result.user;
+//                 // console.log(user);
+//             }).catch((error) => {
+//                 const errorCode = error.code;
+//                 const errorMessage = error.message;
+//             })
+//         }
+
+//         const userSignOut = async() => {
+//             signOut(auth).then(() => {
+//                 alert("You have signed out.")
+//             }).catch((error) => {})
+//         }
+
+//         onAuthStateChanged(auth, (user) => {
+//             if(user) {
+//                 logoutButton.style.display = "block";
+//                 loginButton.style.display = "none";
+//                 username = user.displayName;
+//                 emailid = user.email;
+//                 loginMessage.textContent = `You have signed in as ${username} with the email address ${emailid}`
+//                 loginMessage.style.display = "block";
+//                 userInDB = ref(db, user.displayName);
+//                 // console.log(userInDB)
+//             } else {
+//                 logoutButton.style.display = "none";
+//                 loginButton.style.display = "block";
+//                 loginMessage.style.display = "none";
+//             }
+//         });
 fetch('firebaseConfig.json')
-   .then(response => response.json())
-   .then(data => {
-        // Initialize Firebase using the loaded configuration
-        const app = initializeApp(data);
+    .then(response => response.json())
+    .then(data => {
+        const firebaseData = initializeFirebase(data);
 
-        //  Initialize Firebase Authentication
-        //  const auth = getAuth();
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const provider = new GoogleAuthProvider();
-        const analytics = getAnalytics(app);
-
-        //User Authentication
-        let nameField = document.getElementById("nameField");
-        let username, emailid;
-
-        //Login Functions
-        const userSignIn = async() => {
-            signInWithPopup(auth, provider)
-            .then((result) => {
-                const user = result.user;
-                // console.log(user);
-            }).catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-            })
-        }
-
-        const userSignOut = async() => {
-            signOut(auth).then(() => {
-                alert("You have signed out.")
-            }).catch((error) => {})
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            if(user) {
-                logoutButton.style.display = "block";
-                loginButton.style.display = "none";
-                username = user.displayName;
-                emailid = user.email;
-                loginMessage.textContent = `You have signed in as ${username} with the email address ${emailid}`
-                loginMessage.style.display = "block";
-                userInDB = ref(db, user.displayName);
-                // console.log(userInDB)
-            } else {
-                logoutButton.style.display = "none";
-                loginButton.style.display = "block";
-                loginMessage.style.display = "none";
-            }
-        });
-
+        // const {
+        //     app,
+        //     auth,
+        //     db,
+        //     provider,
+        //     analytics,
+        //     userSignIn,
+        //     userSignOut
+        // } = firebaseData;
         //login
-        let loginButton = document.createElement("button");
-        loginButton.textContent = "Login with Google";
-        loginButton.style.backgroundColor = "white";
-        loginButton.style.color = "black"; 
-        loginButton.style.borderStyle = "solid"; 
-        loginButton.addEventListener('click', userSignIn);
-        //logout
-        let logoutButton = document.createElement("button");
-        logoutButton.textContent = "Logout";
-        logoutButton.style.backgroundColor = "white";
-        logoutButton.style.color = "black"; 
-        logoutButton.style.borderStyle = "solid"; 
-        logoutButton.addEventListener('click', userSignOut);
+        // let loginButton = document.createElement("button");
+        // loginButton.textContent = "Login with Google";
+        // loginButton.style.backgroundColor = "white";
+        // loginButton.style.color = "black"; 
+        // loginButton.style.borderStyle = "solid"; 
+        // loginButton.addEventListener('click', userSignIn);
+        // //logout
+        // let logoutButton = document.createElement("button");
+        // logoutButton.textContent = "Logout";
+        // logoutButton.style.backgroundColor = "white";
+        // logoutButton.style.color = "black"; 
+        // logoutButton.style.borderStyle = "solid"; 
+        // logoutButton.addEventListener('click', userSignOut);
 
-        logoutButton.style.display = "none";
+        // logoutButton.style.display = "none";
 
-        //Login message
-        let loginMessage = document.createElement("div");
-        loginMessage.style.display = "none";
+        // //Login message
+        // let loginMessage = document.createElement("div");
+        // loginMessage.style.display = "none";
         
-        // nameField.appendChild(nameFieldTxtBox);
-        nameField.appendChild(loginButton);
-        nameField.appendChild(logoutButton);
-        nameField.appendChild(loginMessage);
+        // // nameField.appendChild(nameFieldTxtBox);
+        // nameField.appendChild(loginButton);
+        // nameField.appendChild(logoutButton);
+        // nameField.appendChild(loginMessage);
    })
    .catch(error => {
-      console.error('Error loading Firebase configuration:', error);
-   });
+    console.error('Error loading Firebase configuration:', error);
+});
+//    .catch(error => {
+//       console.error('Error loading Firebase configuration:', error);
+//    });
 
 // const firebaseConfig = {
 //   apiKey: "AIzaSyBZ7lKwOfHfLmaKJoR3lyIKGjPBpCm8_5k",
