@@ -9,6 +9,10 @@ import { getDatabase, ref, set, push, query, equalTo, orderByChild, onChildAdded
 import { checkForUserInRegularDB, giveAuthUserRegularDBEntry } from "./firebase-auth.js";
 
 
+//Import Firebase Authentication
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -21,14 +25,23 @@ const firebaseConfig = {
   appId: "1:695121006555:web:def24557c0ffb9bed521fe",
   measurementId: "G-88SJ1NTH56"
 };
-
+ 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+//Initialize Firebase Authentication
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
+
 const analytics = getAnalytics(app);
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
 const db = getDatabase(app);
-const promptInDB = ref(db, "prompts");
+let promptInDB;
+let userInDB; //create user folder
+let projectInDB; //create project folder
+let projectFolder;
+let assumptionInDB; //create assumption folder in project folder
+let questionInDB; //create question folder in project folder
 
 const textDiv = document.getElementById("resulting_text");
 const waitingDiv = document.getElementById("waiting_text");
@@ -37,17 +50,106 @@ const waitingDiv = document.getElementById("waiting_text");
 
 init()
 
-function init() {
-    console.log("init");
+//User Authentication
+let nameField = document.getElementById("nameField");
+let username, emailid;
 
-    let nameField = document.getElementById("nameField");
-    let nameFieldTxtBox = document.createElement("input");
-    nameFieldTxtBox.type = "text";
-    nameFieldTxtBox.id = "inputName";
-    nameFieldTxtBox.placeholder = "Enter a username";
-    nameFieldTxtBox.size = 30;
-    nameField.appendChild(nameFieldTxtBox);
-    
+//Project Name
+let projectTitle = document.getElementById("projectTitle");
+let projectTitleEntry = document.createElement("input");
+projectTitleEntry.placeholder = "Enter a Project Name";
+let projectTitleButton = document.createElement("button");
+projectTitleButton.textContent = "Save";
+projectTitleButton.style.backgroundColor = "white";
+projectTitleButton.style.color = "black"; 
+projectTitleButton.style.borderStyle = "solid"; 
+projectTitle.appendChild(projectTitleEntry);
+projectTitle.appendChild(projectTitleButton);
+projectTitleButton.addEventListener('click', () => {
+        projectFolder = projectTitleEntry.value
+        // push(userInDB, projectTitleEntry.value);
+        console.log(username);
+        console.log(projectFolder)
+        assumptionInDB = ref(db, username + '/' + projectFolder + '/assumptions')
+        questionInDB = ref(db, username + '/' + projectFolder + '/questions')
+        
+});
+
+//Preview Form
+let formButton = document.createElement("button");
+formButton.textContent = "Preview Form";
+formButton.style.backgroundColor = "white";
+formButton.style.color = "black"; 
+formButton.style.borderStyle = "solid"; 
+formButton.addEventListener('click', () => {
+    window.open(`${location.href}/form.html`)
+})
+projectTitle.appendChild(formButton);
+
+//Login Functions
+const userSignIn = async() => {
+    signInWithPopup(auth, provider)
+    .then((result) => {
+        const user = result.user;
+        // console.log(user);
+    }).catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+    })
+}
+
+const userSignOut = async() => {
+    signOut(auth).then(() => {
+        alert("You have signed out.")
+    }).catch((error) => {})
+}
+
+onAuthStateChanged(auth, (user) => {
+    if(user) {
+        logoutButton.style.display = "block";
+        loginButton.style.display = "none";
+        username = user.displayName;
+        emailid = user.email;
+        loginMessage.textContent = `You have signed in as ${username} with the email address ${emailid}`
+        loginMessage.style.display = "block";
+        userInDB = ref(db, user.displayName);
+        // console.log(userInDB)
+    } else {
+        logoutButton.style.display = "none";
+        loginButton.style.display = "block";
+        loginMessage.style.display = "none";
+    }
+});
+
+//login
+let loginButton = document.createElement("button");
+loginButton.textContent = "Login with Google";
+loginButton.style.backgroundColor = "white";
+loginButton.style.color = "black"; 
+loginButton.style.borderStyle = "solid"; 
+loginButton.addEventListener('click', userSignIn);
+//logout
+let logoutButton = document.createElement("button");
+logoutButton.textContent = "Logout";
+logoutButton.style.backgroundColor = "white";
+logoutButton.style.color = "black"; 
+logoutButton.style.borderStyle = "solid"; 
+logoutButton.addEventListener('click', userSignOut);
+
+logoutButton.style.display = "none";
+
+//Login message
+let loginMessage = document.createElement("div");
+loginMessage.style.display = "none";
+
+// nameField.appendChild(nameFieldTxtBox);
+nameField.appendChild(loginButton);
+nameField.appendChild(logoutButton);
+nameField.appendChild(loginMessage);
+
+
+function init() {
+    console.log("init");    
     let text_container = document.getElementById("text_container");
     let input_field = document.createElement("input");
     input_field.type = "text";
@@ -64,7 +166,8 @@ function init() {
     submitButton.style.backgroundColor = "#1E1A26";
     submitButton.addEventListener("click", function () {
         askForWords(input_field.value);
-        push(promptInDB, input_field.value);
+        push(promptInDB, input_field.value); 
+        push(assumptionInDB, input_field.value); //choose what to push @neeti
     });
 
     let clearButton = document.createElement("button");
@@ -95,7 +198,6 @@ async function askForWords(p_prompt) {
         let newAssumption = await generateAssumptions(p_prompt);
         console.log("newAssumption", newAssumption[0]);
         await generateQuestions(newAssumption[0]);
-
     } else {
         console.log("assumption:", p_prompt);
         await generateQuestions(p_prompt);
@@ -109,11 +211,15 @@ async function generateAssumptions(p_prompt) {
 
     const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
     singleAssumption.push(prompt.output.join(""))
-    console.log("singleAssuption", singleAssumption);
+    console.log("singleAssumption", singleAssumption);
 
     const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
     multipleAssumptions.push(furtherPrompt.output.join(""))
     console.log("multipleAssumptions", multipleAssumptions);
+
+    // textDiv.innerHTML = multipleAssumptions;
+    // waitingDiv.innerHTML = "Suggested Questions:";
+    // changeToInputField();
 
     // textDiv.innerHTML = multipleAssumptions;
     // waitingDiv.innerHTML = "Suggested Questions:";
@@ -134,18 +240,18 @@ async function generateQuestions(p_prompt) {
 
     for (let i = 0; i < questions.length; i++) {
         console.log("question:", questions[i]);
-        questions[i] = questions[i].replace(/"/g, ''); // Removes all double quotes from the string
-        createInputBoxWithQuestion(questions[i]); // Create new input box and buttons for each question
+        // let words_response = questions[i];
+        // textDiv.innerHTML = words_response;
+        // waitingDiv.innerHTML = "Suggested Questions:";
+        // changeToInputField();
+        createInputBoxWithQuestion(questions[i]);
+        // Create new input box and buttons
     } 
     waitingDiv.innerHTML = "Suggested Questions:";
     // return questions;
 }
 
 function createInputBoxWithQuestion(question) {
-    // function createInputBoxWithQuestion(question, clickedButton) {
-    // Get the parent container of the clicked button
-    // const parentContainer = clickedButton.parentElement;
-
     // Create a new div element to contain the textarea and buttons
     const containerDiv = document.createElement("div");
 
@@ -158,20 +264,28 @@ function createInputBoxWithQuestion(question) {
 
     // Create three buttons
     const button1 = document.createElement("button");
-    button1.textContent = "Gnereate Questions";
+    button1.textContent = "Generate Questions";
     button1.style.backgroundColor = "#1E1A26";
-    button1.addEventListener("click", function (event) {
-        const textAreaValue = textareaElement.value; // Get the content of the associated textarea
-        askForWords(textAreaValue); // Call generateQuestions function with the textarea content
-    });
-    
+    button1.addEventListener('click', function() {
+        askForWords(textareaElement.value);
+        //add questions below the question generating
+    })
+
     const button2 = document.createElement("button");
     button2.textContent = "Save to Form";
     button2.style.backgroundColor = "#5D84A6";
+    button2.addEventListener('click', function() {
+        push(questionInDB, textareaElement.value);
+        button2.textContent = "Saved";
+        //how to delete from firebase?
+    })
 
     const button3 = document.createElement("button");
     button3.textContent = "Delete";
     button3.style.backgroundColor = "#593128";
+    button3.addEventListener('click', function() {
+        containerDiv.remove();
+    })
 
     // Create a line break element to put each textarea on a new line
     const lineBreak = document.createElement("br");
@@ -186,9 +300,6 @@ function createInputBoxWithQuestion(question) {
 
     // Append the container to the textDiv
     textDiv.appendChild(containerDiv);
-
-    // Append the container just after the parent container
-    // parentContainer.insertAdjacentElement('afterend', containerDiv);
 }
 
 
