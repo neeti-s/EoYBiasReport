@@ -214,19 +214,20 @@ async function generateQuestions(p_prompt) {
         // textDiv.innerHTML = words_response;
         // waitingDiv.innerHTML = "Suggested Questions:";
         // changeToInputField();
-        createInputBoxWithQuestion(questions[i]);
+        createInputBoxWithQuestion(questions[i], document.getElementById(questions[i]));
         // Create new input box and buttons
     } 
     waitingDiv.innerHTML = "Suggested Questions:";
     // return questions;
 }
 
-function createInputBoxWithQuestion(question) {
+function createInputBoxWithQuestion(question, targetElement) {
     // Create a new div element to contain the textarea and buttons
     const containerDiv = document.createElement("div");
 
     // Create a new textarea element
     const textareaElement = document.createElement("textarea");
+    containerDiv.id = question; 
     textareaElement.value = question; // Set the content of the textarea
     textareaElement.style.overflow = "auto"; // Make the textarea resizable
     textareaElement.style.width = "75ch"; // maximum width
@@ -269,7 +270,8 @@ function createInputBoxWithQuestion(question) {
     containerDiv.appendChild(lineBreak);
 
     // Append the container to the textDiv
-    textDiv.appendChild(containerDiv);
+    // textDiv.appendChild(containerDiv);
+    targetElement.appendChild(containerDiv);
 }
 
 
