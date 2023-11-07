@@ -32,7 +32,6 @@ const analytics = getAnalytics(app);
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
 const db = getDatabase(app);
-let promptInDB;
 let userInDB; //create user folder
 let projectInDB; //create project folder
 let projectFolder;

@@ -1,0 +1,14 @@
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBZ7lKwOfHfLmaKJoR3lyIKGjPBpCm8_5k",
+  authDomain: "opinionated-shared-minds.firebaseapp.com",
+  databaseURL: "https://opinionated-shared-minds-default-rtdb.firebaseio.com",
+  projectId: "opinionated-shared-minds",
+  storageBucket: "opinionated-shared-minds.appspot.com",
+  messagingSenderId: "695121006555",
+  appId: "1:695121006555:web:def24557c0ffb9bed521fe",
+  measurementId: "G-88SJ1NTH56"
+};
+
+export { firebaseConfig }
