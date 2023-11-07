@@ -1,9 +1,13 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-import { getDatabase, ref, onValue, set, push, onChildAdded, onChildChanged, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { getDatabase, ref, set, push, query, equalTo, orderByChild, onChildAdded, onChildChanged, onChildRemoved, onValue} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
+
+// Import the Firebase Authentication-related functions
+import { checkForUserInRegularDB, giveAuthUserRegularDBEntry } from "./firebase-auth.js";
+
 
 //Import Firebase Authentication
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
@@ -11,27 +15,111 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBZ7lKwOfHfLmaKJoR3lyIKGjPBpCm8_5k",
-  authDomain: "opinionated-shared-minds.firebaseapp.com",
-  databaseURL: "https://opinionated-shared-minds-default-rtdb.firebaseio.com",
-  projectId: "opinionated-shared-minds",
-  storageBucket: "opinionated-shared-minds.appspot.com",
-  messagingSenderId: "695121006555",
-  appId: "1:695121006555:web:def24557c0ffb9bed521fe",
-  measurementId: "G-88SJ1NTH56"
-};
- 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-//Initialize Firebase Authentication
-const auth = getAuth();
-const provider = new GoogleAuthProvider();
+// let app;
+fetch('firebaseConfig.json')
+   .then(response => response.json())
+   .then(data => {
+        // Initialize Firebase using the loaded configuration
+        const app = initializeApp(data);
 
-const analytics = getAnalytics(app);
+        //  Initialize Firebase Authentication
+        //  const auth = getAuth();
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+        const analytics = getAnalytics(app);
+
+        //User Authentication
+        let nameField = document.getElementById("nameField");
+        let username, emailid;
+
+        //Login Functions
+        const userSignIn = async() => {
+            signInWithPopup(auth, provider)
+            .then((result) => {
+                const user = result.user;
+                // console.log(user);
+            }).catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+            })
+        }
+
+        const userSignOut = async() => {
+            signOut(auth).then(() => {
+                alert("You have signed out.")
+            }).catch((error) => {})
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if(user) {
+                logoutButton.style.display = "block";
+                loginButton.style.display = "none";
+                username = user.displayName;
+                emailid = user.email;
+                loginMessage.textContent = `You have signed in as ${username} with the email address ${emailid}`
+                loginMessage.style.display = "block";
+                userInDB = ref(db, user.displayName);
+                // console.log(userInDB)
+            } else {
+                logoutButton.style.display = "none";
+                loginButton.style.display = "block";
+                loginMessage.style.display = "none";
+            }
+        });
+
+        //login
+        let loginButton = document.createElement("button");
+        loginButton.textContent = "Login with Google";
+        loginButton.style.backgroundColor = "white";
+        loginButton.style.color = "black"; 
+        loginButton.style.borderStyle = "solid"; 
+        loginButton.addEventListener('click', userSignIn);
+        //logout
+        let logoutButton = document.createElement("button");
+        logoutButton.textContent = "Logout";
+        logoutButton.style.backgroundColor = "white";
+        logoutButton.style.color = "black"; 
+        logoutButton.style.borderStyle = "solid"; 
+        logoutButton.addEventListener('click', userSignOut);
+
+        logoutButton.style.display = "none";
+
+        //Login message
+        let loginMessage = document.createElement("div");
+        loginMessage.style.display = "none";
+        
+        // nameField.appendChild(nameFieldTxtBox);
+        nameField.appendChild(loginButton);
+        nameField.appendChild(logoutButton);
+        nameField.appendChild(loginMessage);
+   })
+   .catch(error => {
+      console.error('Error loading Firebase configuration:', error);
+   });
+
+// const firebaseConfig = {
+//   apiKey: "AIzaSyBZ7lKwOfHfLmaKJoR3lyIKGjPBpCm8_5k",
+//   authDomain: "opinionated-shared-minds.firebaseapp.com",
+//   databaseURL: "https://opinionated-shared-minds-default-rtdb.firebaseio.com",
+//   projectId: "opinionated-shared-minds",
+//   storageBucket: "opinionated-shared-minds.appspot.com",
+//   messagingSenderId: "695121006555",
+//   appId: "1:695121006555:web:def24557c0ffb9bed521fe",
+//   measurementId: "G-88SJ1NTH56"
+// };
+ 
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+//Initialize Firebase Authentication
+// const auth = getAuth();
+// const provider = new GoogleAuthProvider();
+
+// const analytics = getAnalytics(app);
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
-const db = getDatabase(app);
+// const db = getDatabase(app);
+let promptInDB;
 let userInDB; //create user folder
 let projectInDB; //create project folder
 let projectFolder;
@@ -41,11 +129,9 @@ let questionInDB; //create question folder in project folder
 const textDiv = document.getElementById("resulting_text");
 const waitingDiv = document.getElementById("waiting_text");
 
-init()
+// connectToFirebaseAuth();
 
-//User Authentication
-let nameField = document.getElementById("nameField");
-let username, emailid;
+init()
 
 //Project Name
 let projectTitle = document.getElementById("projectTitle");
@@ -79,67 +165,6 @@ formButton.addEventListener('click', () => {
 })
 projectTitle.appendChild(formButton);
 
-//Login Functions
-const userSignIn = async() => {
-    signInWithPopup(auth, provider)
-    .then((result) => {
-        const user = result.user;
-        // console.log(user);
-    }).catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-    })
-}
-
-const userSignOut = async() => {
-    signOut(auth).then(() => {
-        alert("You have signed out.")
-    }).catch((error) => {})
-}
-
-onAuthStateChanged(auth, (user) => {
-    if(user) {
-        logoutButton.style.display = "block";
-        loginButton.style.display = "none";
-        username = user.displayName;
-        emailid = user.email;
-        loginMessage.textContent = `You have signed in as ${username} with the email address ${emailid}`
-        loginMessage.style.display = "block";
-        userInDB = ref(db, user.displayName);
-        // console.log(userInDB)
-    } else {
-        logoutButton.style.display = "none";
-        loginButton.style.display = "block";
-        loginMessage.style.display = "none";
-    }
-});
-
-//login
-let loginButton = document.createElement("button");
-loginButton.textContent = "Login with Google";
-loginButton.style.backgroundColor = "white";
-loginButton.style.color = "black"; 
-loginButton.style.borderStyle = "solid"; 
-loginButton.addEventListener('click', userSignIn);
-//logout
-let logoutButton = document.createElement("button");
-logoutButton.textContent = "Logout";
-logoutButton.style.backgroundColor = "white";
-logoutButton.style.color = "black"; 
-logoutButton.style.borderStyle = "solid"; 
-logoutButton.addEventListener('click', userSignOut);
-
-logoutButton.style.display = "none";
-
-//Login message
-let loginMessage = document.createElement("div");
-loginMessage.style.display = "none";
-
-// nameField.appendChild(nameFieldTxtBox);
-nameField.appendChild(loginButton);
-nameField.appendChild(logoutButton);
-nameField.appendChild(loginMessage);
-
 
 function init() {
     console.log("init");    
@@ -148,16 +173,36 @@ function init() {
     input_field.type = "text";
     input_field.id = "input_prompt";
     input_field.placeholder = "Enter an Assumption";
-    input_field.size = 100;
-    text_container.prepend(input_field);
-    input_field.addEventListener("keyup", function (event) {
-        if (event.key === "Enter") {
-            askForWords(input_field.value);
-            push(assumptionInDB, input_field.value);
-            // promptInDB = ref(userInDB, input_field.value)
-            // console.log(promptInDB);
-        }
+    input_field.style.width = "75ch";
+    input_field.style.minHeight = "40px";
+    input_field.style.display = "block";
+    text_container.append(input_field);
+
+    // Add buttons
+    let submitButton = document.createElement("button");
+    submitButton.textContent = "Generate Questions";
+    submitButton.style.backgroundColor = "#1E1A26";
+    submitButton.addEventListener("click", function () {
+        askForWords(input_field.value);
+        // push(promptInDB, input_field.value); 
+        push(assumptionInDB, input_field.value); //choose what to push @neeti
     });
+
+    let clearButton = document.createElement("button");
+    clearButton.textContent = "Clear";
+    clearButton.style.backgroundColor = "#593128";
+    clearButton.addEventListener("click", function () {
+        input_field.value = "";
+    });
+
+    text_container.appendChild(submitButton);
+    text_container.appendChild(clearButton);
+    // input_field.addEventListener("keyup", function (event) {
+    //     if (event.key === "Enter") {
+    //         askForWords(input_field.value);
+    //         push(promptInDB, input_field.value);
+    //     }
+    // });
 }
 
 //waiting for response from input field
@@ -171,7 +216,6 @@ async function askForWords(p_prompt) {
         let newAssumption = await generateAssumptions(p_prompt);
         console.log("newAssumption", newAssumption[0]);
         await generateQuestions(newAssumption[0]);
-
     } else {
         console.log("assumption:", p_prompt);
         await generateQuestions(p_prompt);
@@ -190,6 +234,10 @@ async function generateAssumptions(p_prompt) {
     const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
     multipleAssumptions.push(furtherPrompt.output.join(""))
     console.log("multipleAssumptions", multipleAssumptions);
+
+    // textDiv.innerHTML = multipleAssumptions;
+    // waitingDiv.innerHTML = "Suggested Questions:";
+    // changeToInputField();
 
     // textDiv.innerHTML = multipleAssumptions;
     // waitingDiv.innerHTML = "Suggested Questions:";
