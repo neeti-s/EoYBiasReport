@@ -4,6 +4,11 @@ fetch('firebaseConfig.json')
     .then(response => response.json())
     .then(data => {
         const firebaseData = initializeFirebase(data);
+        // initializeFirebase(data);
+        const {
+                db,
+            } = firebaseData;
+            dataBase = db;
    })
    .catch(error => {
     console.error('Error loading Firebase configuration:', error);
