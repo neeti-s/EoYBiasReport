@@ -1,6 +1,8 @@
-import { initializeFirebase } from './firebaseAuth.js';
+import { initializeFirebase, printUsernamePath } from './firebaseAuth.js';
 import { askForWords, generateAssumptions, generateQuestions, createInputBoxWithQuestion, requestWordsFromReplicate } from './QuestionsAssumptions.js';
 import { ref, push } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+let dataBase;
 
 fetch('firebaseConfig.json')
     .then(response => response.json())
@@ -16,12 +18,10 @@ fetch('firebaseConfig.json')
     console.error('Error loading Firebase configuration:', error);
 });
 
-let promptInDB;
-let userInDB; //create user folder
-let projectInDB; //create project folder
 let projectFolder;
 let assumptionInDB; //create assumption folder in project folder
 let questionInDB; //create question folder in project folder
+const username = printUsernamePath();
 
 // const textDiv = document.getElementById("resulting_text");
 // const waitingDiv = document.getElementById("waiting_text");
@@ -42,10 +42,10 @@ projectTitle.appendChild(projectTitleButton);
 projectTitleButton.addEventListener('click', () => {
         projectFolder = projectTitleEntry.value
         // push(userInDB, projectTitleEntry.value);
-        console.log(username);
+        console.log(printUsernamePath);
         console.log(projectFolder)
-        assumptionInDB = ref(db, username + '/' + projectFolder + '/assumptions')
-        questionInDB = ref(db, username + '/' + projectFolder + '/questions')
+        assumptionInDB = ref(dataBase, username + '/' + projectFolder + '/assumptions')
+        questionInDB = ref(dataBase, username + '/' + projectFolder + '/questions')
         
 });
 
