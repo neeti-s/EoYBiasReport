@@ -66,7 +66,7 @@ async function generateQuestions(p_prompt) {
 function createInputBoxWithQuestion(question) {
     // Create a new div element to contain the textarea and buttons
     const containerDiv = document.createElement("div");
-
+    containerDiv.id = question;
     // Create a new textarea element
     const textareaElement = document.createElement("textarea");
     textareaElement.value = question; // Set the content of the textarea

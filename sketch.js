@@ -49,6 +49,12 @@ projectTitleButton.addEventListener('click', () => {
         
 });
 
+function printProjectFolderPath() {
+    return projectFolder;
+}
+
+export { printProjectFolderPath }
+
 //Preview Form
 let formButton = document.createElement("button");
 formButton.textContent = "Preview Form";
@@ -84,10 +90,28 @@ function init() {
         clearButton.addEventListener("click", function () {
             input_field.value = "";
         });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.style.backgroundColor = "#593128";
+        deleteButton.addEventListener('click', function() {
+            // text_container.remove(); 
+            //how to delete new assumption?
+        })
+
+        let addButton = document.createElement("button");
+        addButton.textContent = "Add Assumption";
+        addButton.style.backgroundColor = "#1E1A26";
+        addButton.addEventListener("click", function () {
+            init();
+            text_container.append(deleteButton);
+        });
+
     
-        text_container.prepend(submitButton);
-        text_container.prepend(clearButton);
-        text_container.prepend(input_field);
+        text_container.append(input_field);
+        text_container.append(submitButton);
+        text_container.append(clearButton);
+        text_container.append(addButton);
 
         // input_field.addEventListener("keyup", function (event) {
         //     if (event.key === "Enter") {
