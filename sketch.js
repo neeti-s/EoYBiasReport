@@ -75,49 +75,41 @@ function init() {
     input_field.id = "input_prompt";
     input_field.placeholder = "Enter an Assumption";
     input_field.size = 100;
-        // Add buttons
-        let submitButton = document.createElement("button");
-        submitButton.textContent = "Generate Questions";
-        submitButton.style.backgroundColor = "#1E1A26";
-        submitButton.addEventListener("click", function (e) {
-            console.log(e.target.parentElement.id);
-            console.log(submitButton.parentElement.id);
-            askForWords(input_field.value, e.target.parentElement);
-            push(assumptionInDB, input_field.value); 
-        });
     
-        let clearButton = document.createElement("button");
-        clearButton.textContent = "Clear";
-        clearButton.style.backgroundColor = "#593128";
-        clearButton.addEventListener("click", function () {
-            input_field.value = "";
-        });
+    // Add buttons
+    let submitButton = document.createElement("button");
+    submitButton.textContent = "Generate Questions";
+    submitButton.style.backgroundColor = "#1E1A26";
+    submitButton.addEventListener("click", function (e) {
+        askForWords(input_field.value, e.target.parentElement); //attach to the parent element
+        push(assumptionInDB, input_field.value); 
+    });
 
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.style.backgroundColor = "#593128";
-        deleteButton.addEventListener('click', function() {
-            // text_container.remove(); 
-            //how to delete new assumption?
-        })
+    let clearButton = document.createElement("button");
+    clearButton.textContent = "Clear";
+    clearButton.style.backgroundColor = "#593128";
+    clearButton.addEventListener("click", function () {
+        input_field.value = "";
+    });
 
-        let addButton = document.createElement("button");
-        addButton.textContent = "Add Assumption";
-        addButton.style.backgroundColor = "#1E1A26";
-        addButton.addEventListener("click", function () {
-            init();
-            text_container.append(deleteButton);
-        });
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.style.backgroundColor = "#593128";
+    deleteButton.addEventListener('click', function() {
+        // text_container.remove(); 
+        //how to delete new assumption?
+    })
 
-        text_container.append(input_field);
-        text_container.append(submitButton);
-        text_container.append(clearButton);
-        text_container.append(addButton);
+    let addButton = document.createElement("button");
+    addButton.textContent = "Add Assumption";
+    addButton.style.backgroundColor = "#1E1A26";
+    addButton.addEventListener("click", function () {
+        init();
+        text_container.append(deleteButton);
+    });
 
-        // input_field.addEventListener("keyup", function (event) {
-        //     if (event.key === "Enter") {
-        //         askForWords(input_field.value);
-        //         push(promptInDB, input_field.value);
-        //     }
-        // });
+    text_container.append(input_field);
+    text_container.append(submitButton);
+    text_container.append(clearButton);
+    text_container.append(addButton);
 }

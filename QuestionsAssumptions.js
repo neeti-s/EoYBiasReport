@@ -33,7 +33,7 @@ async function generateAssumptions(p_prompt) {
     multipleAssumptions.push(furtherPrompt.output.join(""))
     console.log("multipleAssumptions", multipleAssumptions);
 
-    // waitingDiv.innerHTML = "Suggested Questions:";
+    waitingDiv.innerHTML = "Suggested Questions:";
     return multipleAssumptions;
 }
 
@@ -50,11 +50,9 @@ async function generateQuestions(p_prompt, ParentDiv) {
 
     for (let i = 0; i < questions.length; i++) {
         console.log("question:", questions[i]);
-        createInputBoxWithQuestion(questions[i], ParentDiv);
-        // Create new input box and buttons
+        createInputBoxWithQuestion(questions[i], ParentDiv);   // Create new input box and buttons
     } 
     waitingDiv.innerHTML = "Suggested Questions:";
-    // return questions;
 }
 
 function createInputBoxWithQuestion(question, ParentDiv) {
@@ -96,8 +94,6 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     // Create a line break element to put each textarea on a new line
     const lineBreak = document.createElement("br");
 
-    // console.log("containerDivID", containerDiv.id);
-
     // Append the textarea, buttons, and line break to the container
     containerDiv.appendChild(textareaElement);
     containerDiv.appendChild(button1);
@@ -106,7 +102,7 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     containerDiv.appendChild(lineBreak);
     containerDiv.appendChild(lineBreak);
 
-    // Append the container to the textDiv
+    // Append the container to the Parent Div
     // textDiv.appendChild(containerDiv); 
     ParentDiv.appendChild(containerDiv); // Appending to the parent elements
 }
