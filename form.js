@@ -19,6 +19,7 @@ fetch('firebaseConfig.json')
 });
 
 let assumptionDiv = document.createElement('div'); 
+let DialogueDiv = dialogueGuideField
 
 function addAssumptionField(key, data) {
     let assumptionField = document.getElementById(key);

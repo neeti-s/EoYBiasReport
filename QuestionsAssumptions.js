@@ -2,9 +2,12 @@ const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
 const textDiv = document.getElementById("resulting_text");
 const waitingDiv = document.getElementById("waiting_text");
+// let parentDiv;
 
 //waiting for response from input field
-async function askForWords(p_prompt) {
+// async function askForWords(p_prompt, ParentDiv, input_container) {
+async function askForWords(p_prompt, ParentDiv) {
+    // console.log(input_container)
     document.body.style.cursor = "progress";
     waitingDiv.innerHTML = "Waiting for reply from Replicate...";
 
@@ -13,10 +16,10 @@ async function askForWords(p_prompt) {
         console.log("question:", p_prompt);
         let newAssumption = await generateAssumptions(p_prompt);
         console.log("newAssumption", newAssumption[0]);
-        await generateQuestions(newAssumption[0]);
+        await generateQuestions(newAssumption[0], ParentDiv);
     } else {
         console.log("assumption:", p_prompt);
-        await generateQuestions(p_prompt);
+        await generateQuestions(p_prompt, ParentDiv);
     }
 }
 
@@ -39,7 +42,7 @@ async function generateAssumptions(p_prompt) {
     return multipleAssumptions;
 }
 
-async function generateQuestions(p_prompt) {
+async function generateQuestions(p_prompt, ParentDiv) {
     console.log("Entered generateQuestions");
     const sentences = p_prompt.match(/[^.!]+[.!]+/g);
     let questions = [];
@@ -56,14 +59,14 @@ async function generateQuestions(p_prompt) {
         // textDiv.innerHTML = words_response;
         // waitingDiv.innerHTML = "Suggested Questions:";
         // changeToInputField();
-        createInputBoxWithQuestion(questions[i]);
+        createInputBoxWithQuestion(questions[i], ParentDiv);
         // Create new input box and buttons
     } 
     waitingDiv.innerHTML = "Suggested Questions:";
     // return questions;
 }
 
-function createInputBoxWithQuestion(question) {
+function createInputBoxWithQuestion(question, ParentDiv) {
     // Create a new div element to contain the textarea and buttons
     const containerDiv = document.createElement("div");
     containerDiv.id = question;
@@ -78,8 +81,22 @@ function createInputBoxWithQuestion(question) {
     const button1 = document.createElement("button");
     button1.textContent = "Generate Questions";
     button1.style.backgroundColor = "#1E1A26";
-    button1.addEventListener('click', function() {
-        askForWords(textareaElement.value);
+    button1.addEventListener('click', function(e) {
+        // console.log(e.target.parentElement);
+        // askForWords(textareaElement.value);
+        // let parent_div = containerDiv;
+        // if(e.target.parentElement!= null || e.target.parentElement!= undefined || e.target.parentElement!= ""|| e.target.parentElement!= e.target){
+            let parentDiv = e.target.parentElement;
+            askForWords(textareaElement.value, parentDiv);
+        // }
+        // else{
+            // parentDiv = textDiv;
+            // askForWords(textareaElement.value, parentDiv);
+        // }
+        // let target_div = e.target.parentElement;
+        // const parent_div = document.createElement("div");
+        // parent_div.id = question;
+        // target_div.appendChild(ParentDiv);
         //add questions below the question generating
     })
 
@@ -102,6 +119,8 @@ function createInputBoxWithQuestion(question) {
     // Create a line break element to put each textarea on a new line
     const lineBreak = document.createElement("br");
 
+    // console.log("containerDivID", containerDiv.id);
+
     // Append the textarea, buttons, and line break to the container
     containerDiv.appendChild(textareaElement);
     containerDiv.appendChild(button1);
@@ -111,7 +130,9 @@ function createInputBoxWithQuestion(question) {
     containerDiv.appendChild(lineBreak);
 
     // Append the container to the textDiv
-    textDiv.appendChild(containerDiv);
+    // textDiv.appendChild(containerDiv);
+    console.log("ParentDiv", ParentDiv);  
+    ParentDiv.appendChild(containerDiv);
 }
 
 

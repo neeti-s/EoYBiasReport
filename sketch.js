@@ -79,8 +79,10 @@ function init() {
         let submitButton = document.createElement("button");
         submitButton.textContent = "Generate Questions";
         submitButton.style.backgroundColor = "#1E1A26";
-        submitButton.addEventListener("click", function () {
-            askForWords(input_field.value);
+        submitButton.addEventListener("click", function (e) {
+            console.log(e.target.parentElement.id);
+            console.log(submitButton.parentElement.id);
+            askForWords(input_field.value, e.target.parentElement);
             push(assumptionInDB, input_field.value); 
         });
     
@@ -107,7 +109,6 @@ function init() {
             text_container.append(deleteButton);
         });
 
-    
         text_container.append(input_field);
         text_container.append(submitButton);
         text_container.append(clearButton);
