@@ -1,18 +1,22 @@
 import { initializeFirebase, printUsernamePath } from './firebaseAuth.js';
 import { askForWords, generateAssumptions, generateQuestions, createInputBoxWithQuestion, requestWordsFromReplicate } from './QuestionsAssumptions.js';
-import { ref, push } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
 let dataBase;
+let username;
 
 fetch('firebaseConfig.json')
     .then(response => response.json())
     .then(data => {
         const firebaseData = initializeFirebase(data);
-        // initializeFirebase(data);
         const {
-                db,
-            } = firebaseData;
-            dataBase = db;
+            db,
+        } = firebaseData;
+        dataBase = db;  
+        printUsernamePath((updatedUsername) => {
+            username = updatedUsername;
+            console.log(username);
+        }); 
    })
    .catch(error => {
     console.error('Error loading Firebase configuration:', error);
@@ -21,8 +25,6 @@ fetch('firebaseConfig.json')
 let projectFolder;
 let assumptionInDB; //create assumption folder in project folder
 let questionInDB; //create question folder in project folder
-const username = printUsernamePath();
-
 // const textDiv = document.getElementById("resulting_text");
 // const waitingDiv = document.getElementById("waiting_text");
 
@@ -41,19 +43,17 @@ projectTitle.appendChild(projectTitleEntry);
 projectTitle.appendChild(projectTitleButton);
 projectTitleButton.addEventListener('click', () => {
         projectFolder = projectTitleEntry.value
-        // push(userInDB, projectTitleEntry.value);
-        console.log(printUsernamePath);
         console.log(projectFolder)
+        console.log(username);
         assumptionInDB = ref(dataBase, username + '/' + projectFolder + '/assumptions')
         questionInDB = ref(dataBase, username + '/' + projectFolder + '/questions')
-        
+        let usernameDB = ref(dataBase, username);
+        console.log(usernameDB);
+        onValue(usernameDB, (snapshot) => {
+            const data = snapshot.val(); 
+            console.log(data)
+          });
 });
-
-function printProjectFolderPath() {
-    return projectFolder;
-}
-
-export { printProjectFolderPath }
 
 //Preview Form
 let formButton = document.createElement("button");
@@ -81,7 +81,8 @@ function init() {
         submitButton.style.backgroundColor = "#1E1A26";
         submitButton.addEventListener("click", function () {
             askForWords(input_field.value);
-            push(assumptionInDB, input_field.value); 
+            push(assumptionInDB, {"assumption":input_field.value});
+        
         });
     
         let clearButton = document.createElement("button");
@@ -120,3 +121,22 @@ function init() {
         //     }
         // });
 }
+
+function printAssumptionInDB() {
+    return assumptionInDB;
+}
+
+export { printAssumptionInDB }
+
+function printQuestionInDB() {
+    return questionInDB;
+}
+
+
+export { printQuestionInDB }
+
+function printProjectFolderPath() {
+    return projectFolder;
+}
+
+export { printProjectFolderPath }

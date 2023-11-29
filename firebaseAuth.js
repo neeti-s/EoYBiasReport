@@ -9,6 +9,7 @@ import { getDatabase, ref, set, push, query, equalTo, orderByChild, onChildAdded
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 
 let username, emailid, userInDB; 
+let usernameCallback;
 
 // Function to initialize Firebase using the loaded configuration
 const initializeFirebase = (data) => {
@@ -23,7 +24,6 @@ const initializeFirebase = (data) => {
         signInWithPopup(auth, provider)
             .then((result) => {
                 const user = result.user;
-                // console.log(user);
             }).catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
@@ -47,12 +47,14 @@ const initializeFirebase = (data) => {
             loginMessage.textContent = `You have signed in as ${username} with the email address ${emailid}`
             loginMessage.style.display = "block";
             userInDB = ref(db, user.displayName);
-            // console.log(userInDB)
+
+            if (usernameCallback) {
+                usernameCallback(username);
+            }
         } else {
             logoutButton.style.display = "none";
             loginButton.style.display = "block";
-            loginMessage.style.display = "none";
-        }
+            loginMessage.style.display = "none";        }
     });
     
     let loginButton = document.createElement("button");
@@ -75,18 +77,27 @@ const initializeFirebase = (data) => {
     let loginMessage = document.createElement("div");
     loginMessage.style.display = "none";
 
-    // nameField.appendChild(nameFieldTxtBox);
     nameField.appendChild(loginButton);
     nameField.appendChild(logoutButton);
     console.log(loginMessage.textContent);
     nameField.appendChild(loginMessage);
 
     return { app, auth, db, provider, analytics, userSignIn, userSignOut };
+
 };
 
-function printUsernamePath () {
-    return username;
+function printUsernamePath(callback) {
+    if (typeof callback === 'function') {
+        if (username) {
+            callback(username);
+        } else {
+            usernameCallback = callback;
+        }
+    } else {
+        console.error('Callback is not a function.');
+    }
 }
+
 
 export { initializeFirebase, printUsernamePath };
 

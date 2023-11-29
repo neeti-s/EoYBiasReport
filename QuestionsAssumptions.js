@@ -1,5 +1,8 @@
-const replicateProxy = "https://replicate-api-proxy.glitch.me"
+import { printUsernamePath } from './firebaseAuth.js';
+import { ref, push } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { printProjectFolderPath, printQuestionInDB } from "./sketch.js";
 
+const replicateProxy = "https://replicate-api-proxy.glitch.me"
 const textDiv = document.getElementById("resulting_text");
 const waitingDiv = document.getElementById("waiting_text");
 
@@ -87,10 +90,12 @@ function createInputBoxWithQuestion(question) {
     button2.textContent = "Save to Form";
     button2.style.backgroundColor = "#5D84A6";
     button2.addEventListener('click', function() {
+        // let projectFolder = printProjectFolderPath();
+        // let questionInDB = ref(dataBase, username + '/' + projectFolder + '/questions');
+        let questionInDB = printQuestionInDB();
         push(questionInDB, textareaElement.value);
         button2.textContent = "Saved";
-        //how to delete from firebase?
-    })
+    });
 
     const button3 = document.createElement("button");
     button3.textContent = "Delete";
