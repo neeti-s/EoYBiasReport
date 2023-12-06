@@ -26,18 +26,19 @@ async function askForWords(p_prompt, ParentDiv) {
 async function generateAssumptions(p_prompt) {
     console.log("Entered generateAssumptions")
     let singleAssumption = [];
-    let multipleAssumptions = [];
+    // let multipleAssumptions = [];
 
     const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
     singleAssumption.push(prompt.output.join(""))
     console.log("singleAssumption", singleAssumption);
 
-    const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
-    multipleAssumptions.push(furtherPrompt.output.join(""))
-    console.log("multipleAssumptions", multipleAssumptions);
+    // const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
+    // multipleAssumptions.push(furtherPrompt.output.join(""))
+    // console.log("multipleAssumptions", multipleAssumptions);
 
     waitingDiv.innerHTML = "Suggested Questions:";
-    return multipleAssumptions;
+    // return multipleAssumptions;
+    return singleAssumption;
 }
 
 async function generateQuestions(p_prompt, ParentDiv) {
@@ -46,7 +47,7 @@ async function generateQuestions(p_prompt, ParentDiv) {
     let questions = [];
     for (let i = 0; i < sentences.length; i++) {
         const sentence = sentences[i];
-        sentences[i] = await requestWordsFromReplicate(sentence + " Convert this to a question. Limit to one sentence. Avoid first person language.");
+        sentences[i] = await requestWordsFromReplicate(sentence + " Convert this to a question. Limit to one sentence. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
         questions.push(sentences[i].output.join(""));  
     }
     console.log("multipleQuestions", questions);
@@ -63,8 +64,15 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     const containerDiv = document.createElement("div");
     containerDiv.id = question;
     // Create a new textarea element
+    const headingElement = document.createElement("h2");
+    headingElement.textContent = question; // Set the content of the textarea
+    // headingElement.style.overflow = "auto"; // Make the textarea resizable
+    headingElement.style.fontSize = "1.5em";
+    // headingElement.style.width = "75ch"; // maximum width
+    // headingElement.style.minHeight = "40px"; // minimum height
+
     const textareaElement = document.createElement("textarea");
-    textareaElement.value = question; // Set the content of the textarea
+    textareaElement.value = ""; // Set the content of the textarea
     textareaElement.style.overflow = "auto"; // Make the textarea resizable
     textareaElement.style.width = "75ch"; // maximum width
     textareaElement.style.minHeight = "40px"; // minimum height
@@ -78,16 +86,16 @@ function createInputBoxWithQuestion(question, ParentDiv) {
         askForWords(textareaElement.value, parentDiv);
     })
 
-    const button2 = document.createElement("button");
-    button2.textContent = "Save to Form";
-    button2.style.backgroundColor = "#5D84A6";
-    button2.addEventListener('click', function() {
-        // let projectFolder = printProjectFolderPath();
-        // let questionInDB = ref(dataBase, username + '/' + projectFolder + '/questions');
-        let questionInDB = printQuestionInDB();
-        push(questionInDB, textareaElement.value);
-        button2.textContent = "Saved";
-    });
+    // const button2 = document.createElement("button");
+    // button2.textContent = "Save to Form";
+    // button2.style.backgroundColor = "#5D84A6";
+    // button2.addEventListener('click', function() {
+    //     // let projectFolder = printProjectFolderPath();
+    //     // let questionInDB = ref(dataBase, username + '/' + projectFolder + '/questions');
+    //     let questionInDB = printQuestionInDB();
+    //     push(questionInDB, textareaElement.value);
+    //     button2.textContent = "Saved";
+    // });
 
     const button3 = document.createElement("button");
     button3.textContent = "Delete";
@@ -100,9 +108,10 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     const lineBreak = document.createElement("br");
 
     // Append the textarea, buttons, and line break to the container
+    containerDiv.appendChild(headingElement);
     containerDiv.appendChild(textareaElement);
     containerDiv.appendChild(button1);
-    containerDiv.appendChild(button2);
+    // containerDiv.appendChild(button2);
     containerDiv.appendChild(button3);
     containerDiv.appendChild(lineBreak);
     containerDiv.appendChild(lineBreak);
