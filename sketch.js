@@ -10,6 +10,7 @@ let questionInDB; //create question folder in project folder
 // const textDiv = document.getElementById("resulting_text");
 // const waitingDiv = document.getElementById("waiting_text");
 
+
 // //Project Name
 // let projectTitle = document.getElementById("projectTitle");
 // let projectTitleEntry = document.createElement("input");
