@@ -47,7 +47,7 @@ async function generateQuestions(p_prompt, ParentDiv) {
     let questions = [];
     for (let i = 0; i < sentences.length; i++) {
         const sentence = sentences[i];
-        sentences[i] = await requestWordsFromReplicate(sentence + " Rephrase and convert this to a question. Limit to one sentence. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
+        sentences[i] = await requestWordsFromReplicate(sentence + " First rephrase. then convert this to a question. Limit to one sentence. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
         questions.push(sentences[i].output.join(""));  
     }
     console.log("multipleQuestions", questions);
