@@ -69,6 +69,7 @@ function init() {
     submitButton.style.backgroundColor = "#1E1A26";
     submitButton.addEventListener("click", function (e) {
         askForWords(input_field.value, e.target.parentElement); //attach to the parent element
+        assumptionInDB = ref(dataBase, 'assumptions')
         push(assumptionInDB, input_field.value); 
     });
 
