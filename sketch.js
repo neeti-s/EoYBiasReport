@@ -10,43 +10,6 @@ let questionInDB; //create question folder in project folder
 // const textDiv = document.getElementById("resulting_text");
 // const waitingDiv = document.getElementById("waiting_text");
 
-
-// //Project Name
-// let projectTitle = document.getElementById("projectTitle");
-// let projectTitleEntry = document.createElement("input");
-// projectTitleEntry.placeholder = "Enter a Project Name";
-// let projectTitleButton = document.createElement("button");
-// projectTitleButton.textContent = "Save";
-// projectTitleButton.style.backgroundColor = "white";
-// projectTitleButton.style.color = "black"; 
-// projectTitleButton.style.borderStyle = "solid"; 
-// projectTitle.appendChild(projectTitleEntry);
-// projectTitle.appendChild(projectTitleButton);
-// projectTitleButton.addEventListener('click', () => {
-//         projectFolder = projectTitleEntry.value
-//         console.log(projectFolder)
-//         console.log(username);
-//         assumptionInDB = ref(dataBase, username + '/' + projectFolder + '/assumptions')
-//         questionInDB = ref(dataBase, username + '/' + projectFolder + '/questions')
-//         let usernameDB = ref(dataBase, username);
-//         console.log(usernameDB);
-//         onValue(usernameDB, (snapshot) => {
-//             const data = snapshot.val(); 
-//             console.log(data)
-//           });
-// });
-
-//Preview Form
-// let formButton = document.createElement("button");
-// formButton.textContent = "Preview Form";
-// formButton.style.backgroundColor = "white";
-// formButton.style.color = "black"; 
-// formButton.style.borderStyle = "solid"; 
-// formButton.addEventListener('click', () => {
-//     window.open(`${location.href}/form.html`)
-// })
-// projectTitle.appendChild(formButton);
-
 init()
 const addButton = document.getElementById("addButton"); // Get the button element
 addButton.addEventListener("click", init); // Add click event listener to the button
