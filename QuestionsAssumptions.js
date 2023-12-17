@@ -3,8 +3,8 @@ import { ref, push } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-da
 import { printProjectFolderPath, printQuestionInDB } from "./sketch.js";
 
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
-const textDiv = document.getElementById("resulting_text");
-const waitingDiv = document.getElementById("waiting_text");
+
+const waitingDiv = document.getElementById("current_question");
 
 //waiting for response from input field
 async function askForWords(p_prompt, ParentDiv) {
@@ -36,7 +36,7 @@ async function generateAssumptions(p_prompt) {
     // multipleAssumptions.push(furtherPrompt.output.join(""))
     // console.log("multipleAssumptions", multipleAssumptions);
 
-    waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
+    // waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
     // return multipleAssumptions;
     return singleAssumption;
 }
@@ -47,7 +47,8 @@ async function generateQuestions(p_prompt, ParentDiv) {
     let questions = [];
     for (let i = 0; i < sentences.length; i++) {
         const sentence = sentences[i];
-        sentences[i] = await requestWordsFromReplicate(sentence + " First rephrase. then convert this to a question. Limit to one sentence. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
+        sentences[i] = await requestWordsFromReplicate(sentence + "Convert this to a question. Limit to one sentence of max 20 words. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
+        // First rephrase. then
         questions.push(sentences[i].output.join(""));  
     }
     console.log("multipleQuestions", questions);
@@ -56,13 +57,16 @@ async function generateQuestions(p_prompt, ParentDiv) {
         console.log("question:", questions[i]);
         createInputBoxWithQuestion(questions[i], ParentDiv);   // Create new input box and buttons
     } 
-    waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
+    // waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
 }
 
 function createInputBoxWithQuestion(question, ParentDiv) {
     // update div elements to new question textarea
     let headingElement = document.getElementById("current_question");
     headingElement.innerHTML = question;
+    // console.log(getElementById("question").innerHTML);
+    // let printElement = document.getElementById("question");
+    // printElement.innerHTML = question;
 
     const textareaElement = document.getElementById("input_field");
 
