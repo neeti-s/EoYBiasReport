@@ -1,10 +1,15 @@
 import { initializeFirebase } from './firebaseAuth.js';
-import { ref, push, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { ref, push, set, query, limitToLast, orderByChild, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 import { printAssumptionInDB } from "./sketch.js";
 
 let dataBase;
+let lastAssumption;
+let lastQuestion;
 let assumptionInDB;
 let questionInDB;
+
+const waitingDiv = document.getElementById("current_question");
+const replicateProxy = "https://replicate-api-proxy.glitch.me"
 
 fetch('firebaseConfig.json')
     .then(response => response.json())
@@ -14,14 +19,18 @@ fetch('firebaseConfig.json')
             db,
         } = firebaseData;
         dataBase = db;  
+        getLastSavedAssumption(lastQuestion => {
+            if (lastQuestion !== null) {
+                waitingDiv.innerHTML = lastQuestion;
+                console.log(lastQuestion);
+            } else {
+                waitingDiv.innerHTML = "Write a new assumption";
+            }
+        });
    })
    .catch(error => {
     console.error('Error loading Firebase configuration:', error);
 });
-
-const replicateProxy = "https://replicate-api-proxy.glitch.me"
-
-const waitingDiv = document.getElementById("current_question");
 
 //waiting for response from input field
 async function askForWords(p_prompt, ParentDiv) {
@@ -73,8 +82,13 @@ async function generateQuestions(p_prompt, ParentDiv) {
     for (let i = 0; i < questions.length; i++) {
         console.log("question:", questions[i]);
         createInputBoxWithQuestion(questions[i], ParentDiv);   // Create new input box and buttons
-        questionInDB = ref(dataBase, 'questions')
-        push(questionInDB, questions[i]);
+        const timestamp = Date.now();
+        questionInDB = ref(dataBase, 'questions');
+        const newQuestionRef = push(questionInDB); // Create a new reference using push
+        set(newQuestionRef, {
+            question: questions[i],
+            timestamp: timestamp
+        });
     } 
     // waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
 
@@ -93,10 +107,36 @@ async function generateQuestions(p_prompt, ParentDiv) {
         });
       }
 
+function getLastSavedAssumption(callback) {
+    const lastRef = ref(dataBase, 'questions');
+    
+    // Order the data by timestamp and limit to the last 1
+    const orderedRef = query(lastRef, orderByChild('timestamp'), limitToLast(1));
+     onValue(orderedRef, snapshot => {
+        const lastSavedNode = snapshot.val();
+            if (lastSavedNode) {
+                lastQuestion = lastSavedNode[Object.keys(lastSavedNode)[0]].question;
+                console.log(lastQuestion);
+                callback(lastQuestion);
+            } else {
+                callback(null);
+            }
+        }, {
+        onlyOnce: true // This ensures the listener is triggered only once
+    });
+}
+
 function createInputBoxWithQuestion(question, ParentDiv) {
     // update div elements to new question textarea
     let headingElement = document.getElementById("current_question");
-    headingElement.innerHTML = question;
+    getLastSavedAssumption(lastQuestion => {
+        if (lastQuestion !== null) {
+            headingElement.innerHTML = lastQuestion;
+            console.log(lastQuestion);
+        } else {
+            waitingDiv.innerHTML = "Write a new assumption";
+        }
+    });
     // console.log(getElementById("question").innerHTML);
     // let printElement = document.getElementById("question");
     // printElement.innerHTML = question;
@@ -110,7 +150,7 @@ function createInputBoxWithQuestion(question, ParentDiv) {
         askForWords(textareaElement.value, parentDiv);
         console.log(headingElement.textContent);
         console.log(textareaElement.value);
-        writeAssumption(headingElement.textContent, textareaElement.value);
+        writeAssumption(question, textareaElement.value);
     })
 }
 

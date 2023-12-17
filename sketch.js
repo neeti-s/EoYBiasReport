@@ -3,6 +3,7 @@ import { askForWords, generateAssumptions, generateQuestions, createInputBoxWith
 import { ref, push, onValue, child, set, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
 let dataBase;
+let assumptionInDB;
 
 fetch('firebaseConfig.json')
     .then(response => response.json())
@@ -12,6 +13,8 @@ fetch('firebaseConfig.json')
             db,
         } = firebaseData;
         dataBase = db;  
+        // getLastSavedAssumption();
+
    })
    .catch(error => {
     console.error('Error loading Firebase configuration:', error);
@@ -39,9 +42,6 @@ function init() {
             assumption_field.innerHTML =  input_field.value;
             mainassumptioncounter = false;
         }
-
-        const mainAnQ = document.getElementById("mainAnQ");
-
         const timestamp = Date.now();
         originalAssumption = input_field.value;
         assumptions = ref(dataBase, 'assumptions');
@@ -49,25 +49,6 @@ function init() {
             assumption: originalAssumption,
             timestamp: timestamp
         });
-
-        getLastSavedAssumption();
-
-        function getLastSavedAssumption() {
-            const lastRef = ref(dataBase, 'assumptions');
-        
-            // Order the data by timestamp and limit to the last 1
-            const orderedRef = query(lastRef, orderByChild('timestamp'), limitToLast(1));
-        
-            onValue(orderedRef, snapshot => {
-                const lastSavedNode = snapshot.val();
-                lastAssumption = lastSavedNode[Object.keys(lastSavedNode)[0]].assumption;
-                console.log(lastAssumption);
-                mainAnQ.innerHTML = "Bias being deconstructed right now: " + lastAssumption;
-
-            }, {
-                onlyOnce: true // This ensures the listener is triggered only once
-            });
-        }
 
         askForWords(input_field.value, e.target.parentElement); //attach to the parent element
         assumptionInDB = ref(dataBase, 'assumptions')
@@ -86,6 +67,27 @@ function init() {
         mainassumptioncounter = true;
         document.getElementById("current_question").innerHTML = "Write a new assumption";
     })
+}
+
+function getLastSavedAssumption() {
+    const mainAnQ = document.getElementById("mainAnQ");
+    const lastRef = ref(dataBase, 'assumptions');
+
+    // Order the data by timestamp and limit to the last 1
+    const orderedRef = query(lastRef, orderByChild('timestamp'), limitToLast(1));
+
+    onValue(orderedRef, snapshot => {
+        const lastSavedNode = snapshot.val();
+        if (lastSavedNode) {
+            lastAssumption = lastSavedNode[Object.keys(lastSavedNode)[0]].assumption;
+            // console.log(lastSavedNode);
+            mainAnQ.innerHTML = lastAssumption;
+        } else {
+            console.log("No assumptions found.");
+        }
+    }, {
+        onlyOnce: true // This ensures the listener is triggered only once
+    });
 }
 
 function printAssumptionInDB() {
