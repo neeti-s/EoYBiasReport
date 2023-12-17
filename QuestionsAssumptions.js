@@ -60,58 +60,19 @@ async function generateQuestions(p_prompt, ParentDiv) {
 }
 
 function createInputBoxWithQuestion(question, ParentDiv) {
-    // Create a new div element to contain the textarea and buttons
-    const containerDiv = document.createElement("div");
-    containerDiv.id = question;
-    // Create a new textarea element
-    const headingElement = document.createElement("h3");
-    headingElement.textContent = question; // Set the content of the question
-    headingElement.style.fontSize = "1.5em";
+    // update div elements to new question textarea
+    let headingElement = document.getElementById("current_question");
+    headingElement.innerHTML = question;
 
-    const textareaElement = document.createElement("textarea");
-    textareaElement.value = ""; // Set the content of the textarea
-    textareaElement.style.overflow = "auto"; // Make the textarea resizable
-    textareaElement.style.width = "75ch"; // maximum width
-    textareaElement.style.minHeight = "40px"; // minimum height
+    const textareaElement = document.getElementById("input_field");
 
-    // Create three buttons
-    const button1 = document.createElement("button");
-    button1.textContent = "Submit";
-    button1.style.backgroundColor = "#1E1A26";
-    button1.addEventListener('click', function(e) {
+    // submit answer to new question
+    const submitButton = document.getElementById("submit_button");
+    submitButton.addEventListener('click', function(e) {
         let parentDiv = e.target.parentElement; // getting the parent element
         askForWords(textareaElement.value, parentDiv);
     })
-
-    const button3 = document.createElement("button");
-    button3.textContent = "Delete";
-    button3.style.backgroundColor = "#593128";
-    button3.addEventListener('click', function() {
-        containerDiv.remove();
-    })
-
-    // Create a line break element to put each textarea on a new line
-    const lineBreak = document.createElement("br");
-
-    // Append the textarea, buttons, and line break to the container
-    containerDiv.appendChild(headingElement);
-    containerDiv.appendChild(textareaElement);
-    containerDiv.appendChild(button1);
-    // containerDiv.appendChild(button2);
-    containerDiv.appendChild(button3);
-    containerDiv.appendChild(lineBreak);
-    containerDiv.appendChild(lineBreak);
-
-    while (ParentDiv.firstChild) {
-        ParentDiv.removeChild(ParentDiv.firstChild);
-    }
-
-    // Append the container to the Parent Div
-    ParentDiv.appendChild(containerDiv); // Appending to the parent elements
-    // ParentDiv.removeChild(ParentDiv.firstChild); // Removing the first child element
 }
-
-
 
 async function requestWordsFromReplicate(initialPrompt) {
     const data = {

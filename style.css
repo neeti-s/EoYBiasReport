@@ -1,3 +1,17 @@
+@font-face {
+    font-family: 'IBMPlexMonoRegular'; /* Choose a custom name for your font */
+    src: url('IBM_Plex_Mono/IBMPlexMono-Regular.ttf') format('tff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'IBMPlexMonoBold'; /* Choose a custom name for your font */
+    src: url('IBM_Plex_Mono/IBMPlexMono-Bold.ttf') format('tff');
+    font-weight: bold;
+    font-style: normal;
+}
+
 *{
     margin: 0px;
     padding: 0px;
@@ -35,7 +49,7 @@ body{
 .bias_being_decontsructed span h1{
     color: white;
     font-size: 18px;
-    font-family: IBM Plex Mono;
+    font-family: 'IBMPlexMonoRegular', monospace, serif;
     font-weight: 400;
     word-wrap: break-word;
     display: inline;
@@ -43,6 +57,7 @@ body{
 
 .bias_being_decontsructed span:last-child {
     font-weight: 700;
+    font-family: 'IBMPlexMonoBold', monospace, serif;
 }
 
 .current_question h2{
@@ -66,24 +81,34 @@ body{
 
 .input_field {
     align-self: stretch;
-    height: 126px;
+    min-height: 126px;
     background: white;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25) inset;
     border-radius: 10px;
+    border-width: 0px;
+    padding: 10px;
+    font-size: 18px;
+    font-family: 'IBMPlexMonoRegular', monospace, serif;
+    font-weight: normal;
+    color: #006ACC;
+    vertical-align: top;
+    line-height: 1.28; 
+    resize: vertical;
+    white-space: pre-wrap;
 }
 
 .Frame2 {
     background: black;
     border: none;
     word-wrap: break-word;
-    display: inline;
+    display: flex;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: 40px;
+    gap: 25px;
 }
 
 button {
-    background: #0085FF;
+    background: #006ACC;
     padding-left: 75px;
     padding-right: 75px;
     padding-top: 20px;
@@ -94,6 +119,8 @@ button {
     font-size: 18px;
     font-family: Lexend;
     font-weight: 700;
+    border-width: 0;
+    border-style: none;
 }
 
 .Frame4 {
@@ -109,7 +136,7 @@ button {
     height: 35px;
     color: white;
     font-size: 18px;
-    font-family: IBM Plex Mono;
+    font-family: 'IBMPlexMonoBold', monospace, serif;
     font-weight: 700;
     word-wrap: break-word;
 }
@@ -118,7 +145,7 @@ button {
     text-align: right;
     color: white;
     font-size: 18px;
-    font-family: IBM Plex Mono;
+    font-family: 'IBMPlexMonoBold', monospace, serif;
     font-weight: 700;
     word-wrap: break-word;
 }
