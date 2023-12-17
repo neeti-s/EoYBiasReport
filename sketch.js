@@ -1,6 +1,6 @@
 import { initializeFirebase } from './firebaseAuth.js';
 import { askForWords, generateAssumptions, generateQuestions, createInputBoxWithQuestion, requestWordsFromReplicate } from './QuestionsAssumptions.js';
-import { ref, push, onValue, child, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { ref, push, onValue, child, set, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
 let dataBase;
 
@@ -18,7 +18,9 @@ fetch('firebaseConfig.json')
 });
 
 let projectFolder;
-let assumptionInDB; //create assumption folder in project folder
+let originalAssumption;
+let lastAssumption;
+let assumptions; //create assumption folder in project folder
 let questionInDB; //create question folder in project folder
 
 init()
@@ -42,10 +44,38 @@ function init() {
     submitButton.textContent = "Generate Questions";
     submitButton.style.backgroundColor = "#1E1A26";
     submitButton.addEventListener("click", function (e) {
+
         const mainAnQ = document.getElementById("mainAnQ");
-        mainAnQ.innerHTML = "Bias being deconstructed right now: " + input_field.value;
+
+        const timestamp = Date.now();
+        originalAssumption = input_field.value;
+        assumptions = ref(dataBase, 'assumptions');
+        set(push(assumptions),{
+            assumption: originalAssumption,
+            timestamp: timestamp
+        });
+
+        getLastSavedAssumption();
+
+        function getLastSavedAssumption() {
+            const lastRef = ref(dataBase, 'assumptions');
+        
+            // Order the data by timestamp and limit to the last 1
+            const orderedRef = query(lastRef, orderByChild('timestamp'), limitToLast(1));
+        
+            onValue(orderedRef, snapshot => {
+                const lastSavedNode = snapshot.val();
+                lastAssumption = lastSavedNode[Object.keys(lastSavedNode)[0]].assumption;
+                console.log(lastAssumption);
+                mainAnQ.innerHTML = "Bias being deconstructed right now: " + lastAssumption;
+
+            }, {
+                onlyOnce: true // This ensures the listener is triggered only once
+            });
+        }
+
         askForWords(input_field.value, e.target.parentElement); //attach to the parent element
-        //push(assumptionInDB, input_field.value); 
+        
     });
 
     const deleteButton = document.createElement("button");
@@ -63,7 +93,7 @@ function init() {
 }
 
 function printAssumptionInDB() {
-    return assumptionInDB;
+    return assumptions;
 }
 
 export { printAssumptionInDB }

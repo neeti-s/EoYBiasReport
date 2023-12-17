@@ -86,7 +86,7 @@ async function generateQuestions(p_prompt, ParentDiv) {
 }
 
  function writeAssumption(question, answer) {
-    set(push(assumptionInDB, 'user'),{
+    set(push(assumptionInDB),{
           question: question,
           answer: answer,
         });
