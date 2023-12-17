@@ -42,6 +42,8 @@ function init() {
     submitButton.textContent = "Generate Questions";
     submitButton.style.backgroundColor = "#1E1A26";
     submitButton.addEventListener("click", function (e) {
+        const mainAnQ = document.getElementById("mainAnQ");
+        mainAnQ.innerHTML = "Bias being deconstructed right now: " + input_field.value;
         askForWords(input_field.value, e.target.parentElement); //attach to the parent element
         //push(assumptionInDB, input_field.value); 
     });
