@@ -67,6 +67,12 @@ function init() {
         mainassumptioncounter = true;
         document.getElementById("current_question").innerHTML = "Write a new assumption";
     })
+
+    const printButton = document.getElementById("print_button");
+    // addButton.addEventListener("click", init); // Add click event listener to the button
+    printButton.addEventListener("click", function(e) {
+        window.print();
+    })
 }
 
 function getLastSavedAssumption() {
