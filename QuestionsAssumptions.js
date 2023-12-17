@@ -1,6 +1,23 @@
-import { printUsernamePath } from './firebaseAuth.js';
-import { ref, push } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-import { printProjectFolderPath, printQuestionInDB } from "./sketch.js";
+import { initializeFirebase } from './firebaseAuth.js';
+import { ref, push, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { printAssumptionInDB } from "./sketch.js";
+
+let dataBase;
+let assumptionInDB;
+let questionInDB;
+
+fetch('firebaseConfig.json')
+    .then(response => response.json())
+    .then(data => {
+        const firebaseData = initializeFirebase(data);
+        const {
+            db,
+        } = firebaseData;
+        dataBase = db;  
+   })
+   .catch(error => {
+    console.error('Error loading Firebase configuration:', error);
+});
 
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
 const textDiv = document.getElementById("resulting_text");
@@ -55,9 +72,25 @@ async function generateQuestions(p_prompt, ParentDiv) {
     for (let i = 0; i < questions.length; i++) {
         console.log("question:", questions[i]);
         createInputBoxWithQuestion(questions[i], ParentDiv);   // Create new input box and buttons
+        questionInDB = ref(dataBase, 'questions')
+        push(questionInDB, questions[i]);
     } 
     waitingDiv.innerHTML = "Suggested Questions:";
+
+    let input = p_prompt;
+        if (input[input.length-1] === ".") {
+            input = input.slice(0,-1);
+            assumptionInDB = ref(dataBase, '/' + input)
+        }
+
 }
+
+ function writeAssumption(question, answer) {
+    set(push(assumptionInDB, 'user'),{
+          question: question,
+          answer: answer,
+        });
+      }
 
 function createInputBoxWithQuestion(question, ParentDiv) {
     // Create a new div element to contain the textarea and buttons
@@ -84,18 +117,10 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     button1.addEventListener('click', function(e) {
         let parentDiv = e.target.parentElement; // getting the parent element
         askForWords(textareaElement.value, parentDiv);
+        console.log(headingElement.textContent);
+        console.log(textareaElement.value);
+        writeAssumption(headingElement.textContent, textareaElement.value);
     })
-
-    // const button2 = document.createElement("button");
-    // button2.textContent = "Save to Form";
-    // button2.style.backgroundColor = "#5D84A6";
-    // button2.addEventListener('click', function() {
-    //     // let projectFolder = printProjectFolderPath();
-    //     // let questionInDB = ref(dataBase, username + '/' + projectFolder + '/questions');
-    //     let questionInDB = printQuestionInDB();
-    //     push(questionInDB, textareaElement.value);
-    //     button2.textContent = "Saved";
-    // });
 
     const button3 = document.createElement("button");
     button3.textContent = "Delete";
