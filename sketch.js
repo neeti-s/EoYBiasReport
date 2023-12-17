@@ -48,25 +48,28 @@ let questionInDB; //create question folder in project folder
 // projectTitle.appendChild(formButton);
 
 init()
-const addButton = document.getElementById("addButton"); // Get the button element
-addButton.addEventListener("click", init); // Add click event listener to the button
+// const addButton = document.getElementById("addButton"); // Get the button element
+// addButton.addEventListener("click", init); // Add click event listener to the button
 
 
 function init() {
     console.log("init");    
-    let text_container = document.getElementById("text_container");
+    // let text_container = document.getElementById("text_container");
 
-    const assumptionDiv = document.createElement("div");
-    let input_field = document.createElement("input");
-    input_field.type = "text";
-    input_field.id = "input_prompt";
-    input_field.placeholder = "Enter an Assumption";
-    input_field.size = 100;
+    let input_field = document.getElementById("input_field")
+    // const assumptionDiv = document.createElement("div");
+    // let input_field = document.createElement("input");
+    // input_field.type = "textarea";
+    // input_field.id = "input_prompt";
+    // input_field.placeholder = "Enter an Assumption";
+    // input_field.size = "135";
+    // input_field.style.minHeight = "40px";
     
     // Add buttons
-    let submitButton = document.createElement("button");
-    submitButton.textContent = "Generate Questions";
-    submitButton.style.backgroundColor = "#1E1A26";
+    let submitButton = document.getElementById("submit_button")
+    // let submitButton = document.createElement("button");
+    // submitButton.textContent = "Generate Questions";
+    // submitButton.style.backgroundColor = "#1E1A26";
     submitButton.addEventListener("click", function (e) {
         const mainAnQ = document.getElementById("mainAnQ");
         mainAnQ.innerHTML = "Bias being deconstructed right now: " + input_field.value;
@@ -82,9 +85,10 @@ function init() {
     //     input_field.value = "";
     // });
 
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.style.backgroundColor = "#593128";
+    // const deleteButton = document.createElement("button");
+    const deleteButton = document.getElementById("delete_button")
+    // deleteButton.textContent = "Delete";
+    // deleteButton.style.backgroundColor = "#593128";
     deleteButton.addEventListener('click', function(e) {
         e.target.parentElement.remove(); 
         //how to delete new assumption?
@@ -99,10 +103,10 @@ function init() {
     // });
 
     
-    assumptionDiv.append(input_field);
-    assumptionDiv.append(submitButton);
-    assumptionDiv.append(deleteButton);
-    text_container.append(assumptionDiv);
+    // assumptionDiv.append(input_field);
+    // assumptionDiv.append(submitButton);
+    // assumptionDiv.append(deleteButton);
+    // text_container.append(assumptionDiv);
     // text_container.append(clearButton);
     // text_container.append(addButton);
 
