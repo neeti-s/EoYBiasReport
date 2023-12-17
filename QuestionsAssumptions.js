@@ -9,7 +9,7 @@ const waitingDiv = document.getElementById("waiting_text");
 //waiting for response from input field
 async function askForWords(p_prompt, ParentDiv) {
     document.body.style.cursor = "progress";
-    waitingDiv.innerHTML = "Waiting for reply from Replicate...";
+    waitingDiv.innerHTML = "Questioning your Assumptions...";
 
     const isQuestion = p_prompt.endsWith('?');
     if (isQuestion) {
@@ -36,7 +36,7 @@ async function generateAssumptions(p_prompt) {
     // multipleAssumptions.push(furtherPrompt.output.join(""))
     // console.log("multipleAssumptions", multipleAssumptions);
 
-    waitingDiv.innerHTML = "Suggested Questions:";
+    waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
     // return multipleAssumptions;
     return singleAssumption;
 }
@@ -56,7 +56,7 @@ async function generateQuestions(p_prompt, ParentDiv) {
         console.log("question:", questions[i]);
         createInputBoxWithQuestion(questions[i], ParentDiv);   // Create new input box and buttons
     } 
-    waitingDiv.innerHTML = "Suggested Questions:";
+    waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
 }
 
 function createInputBoxWithQuestion(question, ParentDiv) {
@@ -64,12 +64,9 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     const containerDiv = document.createElement("div");
     containerDiv.id = question;
     // Create a new textarea element
-    const headingElement = document.createElement("h2");
-    headingElement.textContent = question; // Set the content of the textarea
-    // headingElement.style.overflow = "auto"; // Make the textarea resizable
+    const headingElement = document.createElement("h3");
+    headingElement.textContent = question; // Set the content of the question
     headingElement.style.fontSize = "1.5em";
-    // headingElement.style.width = "75ch"; // maximum width
-    // headingElement.style.minHeight = "40px"; // minimum height
 
     const textareaElement = document.createElement("textarea");
     textareaElement.value = ""; // Set the content of the textarea
@@ -79,23 +76,12 @@ function createInputBoxWithQuestion(question, ParentDiv) {
 
     // Create three buttons
     const button1 = document.createElement("button");
-    button1.textContent = "Generate Questions";
+    button1.textContent = "Submit";
     button1.style.backgroundColor = "#1E1A26";
     button1.addEventListener('click', function(e) {
         let parentDiv = e.target.parentElement; // getting the parent element
         askForWords(textareaElement.value, parentDiv);
     })
-
-    // const button2 = document.createElement("button");
-    // button2.textContent = "Save to Form";
-    // button2.style.backgroundColor = "#5D84A6";
-    // button2.addEventListener('click', function() {
-    //     // let projectFolder = printProjectFolderPath();
-    //     // let questionInDB = ref(dataBase, username + '/' + projectFolder + '/questions');
-    //     let questionInDB = printQuestionInDB();
-    //     push(questionInDB, textareaElement.value);
-    //     button2.textContent = "Saved";
-    // });
 
     const button3 = document.createElement("button");
     button3.textContent = "Delete";
@@ -116,9 +102,13 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     containerDiv.appendChild(lineBreak);
     containerDiv.appendChild(lineBreak);
 
+    while (ParentDiv.firstChild) {
+        ParentDiv.removeChild(ParentDiv.firstChild);
+    }
+
     // Append the container to the Parent Div
-    // textDiv.appendChild(containerDiv); 
     ParentDiv.appendChild(containerDiv); // Appending to the parent elements
+    // ParentDiv.removeChild(ParentDiv.firstChild); // Removing the first child element
 }
 
 
