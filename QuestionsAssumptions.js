@@ -69,27 +69,34 @@ async function generateAssumptions(p_prompt) {
 
 async function generateQuestions(p_prompt, ParentDiv) {
     console.log("Entered generateQuestions");
-    const sentences = p_prompt.match(/[^.!]+[.!]+/g);
-    let questions = [];
-    for (let i = 0; i < sentences.length; i++) {
-        const sentence = sentences[i];
-        sentences[i] = await requestWordsFromReplicate(sentence + ". Convert this to a question. Limit to one sentence of max 20 words. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
-        // First rephrase. then
-        questions.push(sentences[i].output.join(""));  
-    }
-    console.log("multipleQuestions", questions);
 
-    for (let i = 0; i < questions.length; i++) {
-        console.log("question:", questions[i]);
-        createInputBoxWithQuestion(questions[i], ParentDiv);   // Create new input box and buttons
+    const sentence = p_prompt;
+    const modifiedSentence = await requestWordsFromReplicate(sentence + ". Convert this to a question. Limit to one sentence of max 20 words. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
+    const question = modifiedSentence.output.join("");
+    createInputBoxWithQuestion(question, ParentDiv);
+
+    // const sentences = p_prompt.match(/[^.!]+[.!]+/g);
+    // let questions = [];
+    // for (let i = 0; i < sentences.length; i++) {
+        // const sentence = sentences[i];
+        // sentences[i] = await requestWordsFromReplicate(sentence + ". Convert this to a question. Limit to one sentence of max 20 words. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
+        // First rephrase. then
+        // questions.push(sentences[i].output.join(""));  
+    // }
+    // console.log("multipleQuestions", questions);
+
+    // for (let i = 0; i < questions.length; i++) {
+        // console.log("question:", questions[i]);
+        // createInputBoxWithQuestion(questions[i], ParentDiv);   // Create new input box and buttons
         const timestamp = Date.now();
         questionInDB = ref(dataBase, 'questions');
         const newQuestionRef = push(questionInDB); // Create a new reference using push
         set(newQuestionRef, {
-            question: questions[i],
+            // question: questions[i],
+            question: question,
             timestamp: timestamp
         });
-    } 
+    // } 
     // waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
 
     let input = p_prompt;
@@ -97,7 +104,6 @@ async function generateQuestions(p_prompt, ParentDiv) {
             input = input.slice(0,-1);
             assumptionInDB = ref(dataBase, '/' + input)
         }
-
 }
 
  function writeAssumption(question, answer) {
