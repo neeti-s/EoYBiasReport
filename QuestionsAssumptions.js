@@ -57,7 +57,7 @@ async function generateAssumptions(p_prompt) {
     const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
     singleAssumption.push(prompt.output.join(""))
     console.log("singleAssumption", singleAssumption);
-    
+
     return singleAssumption;
 }
 
@@ -126,16 +126,17 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     // let printElement = document.getElementById("question");
     // printElement.innerHTML = question;
 
-    const textareaElement = document.getElementById("input_field");
+    const input_field = document.getElementById("input_field");
 
     // submit answer to new question
     const submitButton = document.getElementById("submit_button");
     submitButton.addEventListener('click', function(e) {
         let parentDiv = e.target.parentElement; // getting the parent element
-        askForWords(textareaElement.value, parentDiv);
+        askForWords(input_field.value, parentDiv);
         console.log(headingElement.textContent);
-        console.log(textareaElement.value);
-        writeAssumption(question, textareaElement.value);
+        console.log(input_field.value);
+        writeAssumption(question, input_field.value);
+        input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
     })
 }
 

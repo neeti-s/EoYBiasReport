@@ -25,7 +25,7 @@ let originalAssumption;
 let lastAssumption;
 let assumptions; //create assumption folder in project folder
 let questionInDB; //create question folder in project folder
-let mainassumptioncounter = true;
+// let mainassumptioncounter = true;
 
 init();
 
@@ -34,14 +34,15 @@ function init() {
     
     let assumption_field = document.getElementById("mainAnQ");
     let input_field = document.getElementById("input_field");
+    input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
     
     let submitButton = document.getElementById("submit_button")
     submitButton.addEventListener("click", function (e) {
         // const mainAnQ = document.getElementById("mainAnQ");
-        if (mainassumptioncounter == true) {
-            assumption_field.innerHTML =  input_field.value;
-            mainassumptioncounter = false;
-        }
+        // if (mainassumptioncounter == true) {
+        //     assumption_field.innerHTML =  input_field.value;
+        //     mainassumptioncounter = false;
+        // }
         const timestamp = Date.now();
         originalAssumption = input_field.value;
         assumptions = ref(dataBase, 'assumptions');
@@ -64,7 +65,7 @@ function init() {
     const addButton = document.getElementById("assumption_button");
     // addButton.addEventListener("click", init); // Add click event listener to the button
     addButton.addEventListener("click", function(e) {
-        mainassumptioncounter = true;
+        // mainassumptioncounter = true;
         document.getElementById("current_question").innerHTML = "Write a new assumption";
     })
 
