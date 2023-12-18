@@ -74,7 +74,7 @@ body{
     height: 214px;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 25px;
     display: flex;
 }
@@ -100,10 +100,10 @@ body{
 .Frame2 {
     background: black;
     border: none;
-    word-wrap: break-word;
+    /* word-wrap: break-word; */
     display: flex;
     justify-content: flex-start;
-    align-items: flex-start;
+    /* align-items: flex-start; */
     gap: 25px;
 }
 
@@ -121,6 +121,8 @@ button {
     font-weight: 700;
     border-width: 0;
     border-style: none;
+    max-width: 100%; /* Set a maximum width */
+    box-sizing: border-box; /* Include padding and border in the total width and height */
 }
 
 .Frame4 {
@@ -149,3 +151,20 @@ button {
     font-weight: 700;
     word-wrap: break-word;
 }
+
+/* Add the following media query */
+@media (max-width: 767px) {  
+    button {
+      padding-left: 15px;
+      padding-right: 15px;
+      text-align: center; /* Center-align text */
+    }
+    
+    .current_question h2{
+        font-size: 48.60px;
+    }
+
+    .Frame5 {
+        gap: 60px;
+    }
+  }
