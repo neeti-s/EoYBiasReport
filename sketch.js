@@ -26,7 +26,7 @@ let lastAssumption;
 let assumptions; //create assumption folder in project folder
 let questionInDB; //create question folder in project folder
 // let lastAssumptionKey; // Variable to store the key of the last assumption
-// let mainassumptioncounter = true;
+let mainassumptioncounter = true;
 
 init();
 
@@ -39,11 +39,11 @@ function init() {
     
     let submitButton = document.getElementById("submit_button")
     submitButton.addEventListener("click", function (e) {
-        // const mainAnQ = document.getElementById("mainAnQ");
-        // if (mainassumptioncounter == true) {
-        //     assumption_field.innerHTML =  input_field.value;
-        //     mainassumptioncounter = false;
-        // }
+        const mainAnQ = document.getElementById("mainAnQ");
+        if (mainassumptioncounter == true) {
+            // assumption_field.innerHTML =  input_field.value;
+            mainassumptioncounter = false;
+        }
         if (input_field.value === "") {
             console.log("entered an empty assumption", input_field.value);
             input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
@@ -87,7 +87,7 @@ function init() {
     const addButton = document.getElementById("assumption_button");
     // addButton.addEventListener("click", init); // Add click event listener to the button
     addButton.addEventListener("click", function(e) {
-        // mainassumptioncounter = true;
+        mainassumptioncounter = true;
         document.getElementById("current_question").innerHTML = "Write a new assumption";
     })
 
