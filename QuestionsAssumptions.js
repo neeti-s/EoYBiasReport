@@ -37,7 +37,7 @@ fetch('firebaseConfig.json')
 //waiting for response from input field
 async function askForWords(p_prompt, ParentDiv) {
     document.body.style.cursor = "progress";
-    waitingDiv.innerHTML = "Questioning your Assumptions...";
+    waitingDiv.innerHTML = "Please wait. Questioning your Assumptions...";
 
     const isQuestion = p_prompt.endsWith('?');
     if (isQuestion) {
