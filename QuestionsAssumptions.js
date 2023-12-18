@@ -7,6 +7,8 @@ let lastAssumption;
 let lastQuestion;
 let assumptionInDB;
 let questionInDB;
+// let lastAssumptionKey; // Variable to store the key of the last assumption
+// let newQuestionRef; // Declare newQuestionRef at a higher scope
 
 const waitingDiv = document.getElementById("current_question");
 const replicateProxy = "https://replicate-api-proxy.glitch.me"
@@ -71,6 +73,15 @@ async function generateQuestions(p_prompt, ParentDiv) {
 
     const timestamp = Date.now();
     questionInDB = ref(dataBase, 'questions');
+    // newQuestionRef = push(questionInDB, {
+    //     question: question,
+    //     timestamp: timestamp
+    // });
+
+    // // Handle the resolution of the promise to get the key
+    // await newQuestionRef.then((snapshot) => {
+    //     lastAssumptionKey = snapshot.key;
+    // });
     const newQuestionRef = push(questionInDB); // Create a new reference using push
     set(newQuestionRef, {
         // question: questions[i],
@@ -99,14 +110,17 @@ function getLastSavedAssumption(callback) {
     const orderedRef = query(lastRef, orderByChild('timestamp'), limitToLast(1));
      onValue(orderedRef, snapshot => {
         const lastSavedNode = snapshot.val();
-            if (lastSavedNode) {
-                lastQuestion = lastSavedNode[Object.keys(lastSavedNode)[0]].question;
-                console.log(lastQuestion);
-                callback(lastQuestion);
-            } else {
-                callback(null);
-            }
-        }, {
+        // if (newQuestionRef) {
+        //     lastAssumptionKey = newQuestionRef.key; // Retrieve the key from the Reference object
+        // }
+        if (lastSavedNode) {
+            lastQuestion = lastSavedNode[Object.keys(lastSavedNode)[0]].question;
+            console.log(lastQuestion);
+            callback(lastQuestion);
+        } else {
+            callback(null);
+        }
+    }, {
         onlyOnce: true // This ensures the listener is triggered only once
     });
 }

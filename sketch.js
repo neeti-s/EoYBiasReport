@@ -25,6 +25,7 @@ let originalAssumption;
 let lastAssumption;
 let assumptions; //create assumption folder in project folder
 let questionInDB; //create question folder in project folder
+// let lastAssumptionKey; // Variable to store the key of the last assumption
 // let mainassumptioncounter = true;
 
 init();
@@ -32,7 +33,7 @@ init();
 function init() {
     console.log("init");    
     
-    let assumption_field = document.getElementById("mainAnQ");
+    // let assumption_field = document.getElementById("mainAnQ");
     let input_field = document.getElementById("input_field");
     input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
     
@@ -70,6 +71,16 @@ function init() {
     deleteButton.addEventListener('click', function(e) {
         // e.target.parentElement.remove(); 
         //how to delete new assumption?
+        // console.log("entered delete button")
+        // console.log(lastAssumptionKey);
+        // if (lastAssumptionKey) {
+        //     const assumptionRefToDelete = ref(dataBase, `assumptions/${lastAssumptionKey}`);
+        //     set(assumptionRefToDelete, null); // Set the data to null to delete it
+        //     lastAssumptionKey = null; // Reset the lastAssumptionKey
+        //     console.log("deleted assumption");
+        //     getLastSavedAssumption();
+        //     // You may want to update your UI or perform other actions after deletion
+        // }
 
     })
 
@@ -93,6 +104,8 @@ function getLastSavedAssumption() {
         const lastSavedNode = snapshot.val();
         if (lastSavedNode) {
             lastAssumption = lastSavedNode[Object.keys(lastSavedNode)[0]].assumption;
+            // lastAssumptionKey = Object.keys(lastSavedNode)[0]; // Store the key
+            // console.log(lastAssumptionKey);
             // console.log(lastSavedNode);
             mainAnQ.innerHTML = lastAssumption;
         } else {
