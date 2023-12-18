@@ -131,12 +131,20 @@ function createInputBoxWithQuestion(question, ParentDiv) {
     // submit answer to new question
     const submitButton = document.getElementById("submit_button");
     submitButton.addEventListener('click', function(e) {
-        let parentDiv = e.target.parentElement; // getting the parent element
-        askForWords(input_field.value, parentDiv);
-        console.log(headingElement.textContent);
-        console.log(input_field.value);
-        writeAssumption(question, input_field.value);
-        input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
+        if (input_field.value === "") {
+            console.log("entered an empty assumption", input_field.value);
+            input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
+            return;
+        }
+        else{
+            let parentDiv = e.target.parentElement; // getting the parent element
+            askForWords(input_field.value, parentDiv);
+            console.log(headingElement.textContent);
+            console.log(input_field.value);
+            writeAssumption(question, input_field.value);
+            input_field.value = "";
+            input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
+        }
     })
 }
 

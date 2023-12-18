@@ -43,23 +43,34 @@ function init() {
         //     assumption_field.innerHTML =  input_field.value;
         //     mainassumptioncounter = false;
         // }
-        const timestamp = Date.now();
-        originalAssumption = input_field.value;
-        assumptions = ref(dataBase, 'assumptions');
-        set(push(assumptions),{
-            assumption: originalAssumption,
-            timestamp: timestamp
-        });
-
-        askForWords(input_field.value, e.target.parentElement); //attach to the parent element
-        assumptionInDB = ref(dataBase, 'assumptions')
-        push(assumptionInDB, input_field.value); 
+        if (input_field.value === "") {
+            console.log("entered an empty assumption", input_field.value);
+            input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
+            return;
+        }
+        else{
+            const timestamp = Date.now();
+            originalAssumption = input_field.value;
+            assumptions = ref(dataBase, 'assumptions');
+            set(push(assumptions),{
+                assumption: originalAssumption,
+                timestamp: timestamp
+            });
+    
+            askForWords(input_field.value, e.target.parentElement); //attach to the parent element
+            assumptionInDB = ref(dataBase, 'assumptions')
+            push(assumptionInDB, input_field.value);
+            input_field.value = "";
+            input_field.placeholder = "Please write in full sentences. For example: AI should/shouldn’t be used in warfare because..";
+        }
+ 
     });
 
     const deleteButton = document.getElementById("delete_button");
     deleteButton.addEventListener('click', function(e) {
-        e.target.parentElement.remove(); 
+        // e.target.parentElement.remove(); 
         //how to delete new assumption?
+
     })
 
     const addButton = document.getElementById("assumption_button");
