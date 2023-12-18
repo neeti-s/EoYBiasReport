@@ -57,13 +57,7 @@ async function generateAssumptions(p_prompt) {
     const prompt = await requestWordsFromReplicate(p_prompt+ "Limit the answer to 50 words.");
     singleAssumption.push(prompt.output.join(""))
     console.log("singleAssumption", singleAssumption);
-
-    // const furtherPrompt = await requestWordsFromReplicate(singleAssumption + "Divide this into multiple sentences.");
-    // multipleAssumptions.push(furtherPrompt.output.join(""))
-    // console.log("multipleAssumptions", multipleAssumptions);
-
-    // waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
-    // return multipleAssumptions;
+    
     return singleAssumption;
 }
 
@@ -75,29 +69,14 @@ async function generateQuestions(p_prompt, ParentDiv) {
     const question = modifiedSentence.output.join("");
     createInputBoxWithQuestion(question, ParentDiv);
 
-    // const sentences = p_prompt.match(/[^.!]+[.!]+/g);
-    // let questions = [];
-    // for (let i = 0; i < sentences.length; i++) {
-        // const sentence = sentences[i];
-        // sentences[i] = await requestWordsFromReplicate(sentence + ". Convert this to a question. Limit to one sentence of max 20 words. Write in second person. Avoid first person words: I, me, my, mine, myself and instead ask the user the question.");
-        // First rephrase. then
-        // questions.push(sentences[i].output.join(""));  
-    // }
-    // console.log("multipleQuestions", questions);
-
-    // for (let i = 0; i < questions.length; i++) {
-        // console.log("question:", questions[i]);
-        // createInputBoxWithQuestion(questions[i], ParentDiv);   // Create new input box and buttons
-        const timestamp = Date.now();
-        questionInDB = ref(dataBase, 'questions');
-        const newQuestionRef = push(questionInDB); // Create a new reference using push
-        set(newQuestionRef, {
-            // question: questions[i],
-            question: question,
-            timestamp: timestamp
-        });
-    // } 
-    // waitingDiv.innerHTML = "A Question to Challenge your Assumptions:";
+    const timestamp = Date.now();
+    questionInDB = ref(dataBase, 'questions');
+    const newQuestionRef = push(questionInDB); // Create a new reference using push
+    set(newQuestionRef, {
+        // question: questions[i],
+        question: question,
+        timestamp: timestamp
+    });
 
     let input = p_prompt;
         if (input[input.length-1] === ".") {
